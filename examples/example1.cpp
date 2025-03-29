@@ -1,13 +1,10 @@
-#include "myproject/ModuleA.h"
 #include <iostream>
+#include "simd/feature_check.hpp"
 
 int main()
 {
-    myproject::StringProcessor sp;
-    std::string text = "Hello Example 1";
-
-    std::cout << "Original: " << text << std::endl;
-    std::cout << "Reversed: " << sp.reverse(text) << std::endl;
-
+    int simd_support = simd::get_simd_support();
+    std::cout << "SIMD support level: " << simd_support << std::endl;
+   
     return 0;
 }
