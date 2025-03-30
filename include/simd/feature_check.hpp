@@ -504,6 +504,51 @@ public:
         return false;
 #endif
     }
+
+    static SIMD_ALWAYS_INLINE bool has_avx() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs1();
+        bool avx_supported = has_bit(regs.ecx, FeatureBits::ECX1::AVX);
+        bool osxsave_supported = has_bit(regs.ecx, FeatureBits::ECX1::OSXSAVE);
+        uint64_t xcr0 = get_cpuid_data().get_xcr0();
+        bool avx_enabled = (xcr0 & (XCR0_SSE_STATE | XCR0_AVX_STATE)) ==
+                           (XCR0_SSE_STATE | XCR0_AVX_STATE);
+        return avx_supported && osxsave_supported && avx_enabled;
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx2() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx() && has_bit(regs.ebx, FeatureBits::EBX7::AVX2);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_fma() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs1();
+        return has_avx() && has_bit(regs.ecx, FeatureBits::ECX1::FMA);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_f16c() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs1();
+        return has_avx() && has_bit(regs.ecx, FeatureBits::ECX1::F16C);
+#else
+        return false;
+#endif
+    }
 };
 } // namespace detail
 
