@@ -193,6 +193,39 @@ private:
             static constexpr uint32_t HYPERVISOR = 1u << 31;
         };
 
+        struct EDX1
+        {
+            static constexpr uint32_t FPU = 1u << 0;
+            static constexpr uint32_t VME = 1u << 1;
+            static constexpr uint32_t DE = 1u << 2;
+            static constexpr uint32_t PSE = 1u << 3;
+            static constexpr uint32_t TSC = 1u << 4;
+            static constexpr uint32_t MSR = 1u << 5;
+            static constexpr uint32_t PAE = 1u << 6;
+            static constexpr uint32_t MCE = 1u << 7;
+            static constexpr uint32_t CX8 = 1u << 8;
+            static constexpr uint32_t APIC = 1u << 9;
+            static constexpr uint32_t SEP = 1u << 11;
+            static constexpr uint32_t MTRR = 1u << 12;
+            static constexpr uint32_t PGE = 1u << 13;
+            static constexpr uint32_t MCA = 1u << 14;
+            static constexpr uint32_t CMOV = 1u << 15;
+            static constexpr uint32_t PAT = 1u << 16;
+            static constexpr uint32_t PSE36 = 1u << 17;
+            static constexpr uint32_t PSN = 1u << 18;
+            static constexpr uint32_t CLFSH = 1u << 19;
+            static constexpr uint32_t DS = 1u << 21;
+            static constexpr uint32_t ACPI = 1u << 22;
+            static constexpr uint32_t MMX = 1u << 23;
+            static constexpr uint32_t FXSR = 1u << 24;
+            static constexpr uint32_t SSE = 1u << 25;
+            static constexpr uint32_t SSE2 = 1u << 26;
+            static constexpr uint32_t SS = 1u << 27;
+            static constexpr uint32_t HTT = 1u << 28;
+            static constexpr uint32_t TM = 1u << 29;
+            static constexpr uint32_t PBE = 1u << 31;
+        };
+
         struct EBX7
         {
             static constexpr uint32_t FSGSBASE = 1u << 0;
