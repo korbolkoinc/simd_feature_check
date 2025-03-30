@@ -192,6 +192,42 @@ private:
             static constexpr uint32_t RDRND = 1u << 30;
             static constexpr uint32_t HYPERVISOR = 1u << 31;
         };
+
+        struct EBX7
+        {
+            static constexpr uint32_t FSGSBASE = 1u << 0;
+            static constexpr uint32_t TSC_ADJUST = 1u << 1;
+            static constexpr uint32_t SGX = 1u << 2;
+            static constexpr uint32_t BMI1 = 1u << 3;
+            static constexpr uint32_t HLE = 1u << 4;
+            static constexpr uint32_t AVX2 = 1u << 5;
+            static constexpr uint32_t FDP_EXCPTN = 1u << 6;
+            static constexpr uint32_t SMEP = 1u << 7;
+            static constexpr uint32_t BMI2 = 1u << 8;
+            static constexpr uint32_t ERMS = 1u << 9;
+            static constexpr uint32_t INVPCID = 1u << 10;
+            static constexpr uint32_t RTM = 1u << 11;
+            static constexpr uint32_t PQM = 1u << 12;
+            static constexpr uint32_t FPU_CSDS = 1u << 13;
+            static constexpr uint32_t MPX = 1u << 14;
+            static constexpr uint32_t PQE = 1u << 15;
+            static constexpr uint32_t AVX512F = 1u << 16;
+            static constexpr uint32_t AVX512DQ = 1u << 17;
+            static constexpr uint32_t RDSEED = 1u << 18;
+            static constexpr uint32_t ADX = 1u << 19;
+            static constexpr uint32_t SMAP = 1u << 20;
+            static constexpr uint32_t AVX512IFMA = 1u << 21;
+            static constexpr uint32_t PCOMMIT = 1u << 22;
+            static constexpr uint32_t CLFLUSHOPT = 1u << 23;
+            static constexpr uint32_t CLWB = 1u << 24;
+            static constexpr uint32_t INTEL_PT = 1u << 25;
+            static constexpr uint32_t AVX512PF = 1u << 26;
+            static constexpr uint32_t AVX512ER = 1u << 27;
+            static constexpr uint32_t AVX512CD = 1u << 28;
+            static constexpr uint32_t SHA = 1u << 29;
+            static constexpr uint32_t AVX512BW = 1u << 30;
+            static constexpr uint32_t AVX512VL = 1u << 31;
+        };
     };
 
 public:
