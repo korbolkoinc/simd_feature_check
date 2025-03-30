@@ -807,6 +807,66 @@ public:
         return false;
 #endif
     }
+
+    static SIMD_ALWAYS_INLINE bool has_prefetchw() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs81();
+        return has_bit(regs.ecx, FeatureBits::ECX81::PREFETCHW);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_prefetchwt1() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_bit(regs.ecx, FeatureBits::ECX7::PREFETCHWT1);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_aes() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs1();
+        return has_bit(regs.ecx, FeatureBits::ECX1::AES);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_vaes() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_bit(regs.ecx, FeatureBits::ECX7::VAES);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_pclmulqdq() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs1();
+        return has_bit(regs.ecx, FeatureBits::ECX1::PCLMULQDQ);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_vpclmulqdq() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_bit(regs.ecx, FeatureBits::ECX7::VPCLMULQDQ);
+#else
+        return false;
+#endif
+    }
 };
 } // namespace detail
 
