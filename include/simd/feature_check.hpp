@@ -156,6 +156,44 @@ private:
         return (value & bit) != 0;
     }
 
+    struct FeatureBits
+    {
+        struct ECX1
+        {
+            static constexpr uint32_t SSE3 = 1u << 0;
+            static constexpr uint32_t PCLMULQDQ = 1u << 1;
+            static constexpr uint32_t DTES64 = 1u << 2;
+            static constexpr uint32_t MONITOR = 1u << 3;
+            static constexpr uint32_t DS_CPL = 1u << 4;
+            static constexpr uint32_t VMX = 1u << 5;
+            static constexpr uint32_t SMX = 1u << 6;
+            static constexpr uint32_t EIST = 1u << 7;
+            static constexpr uint32_t TM2 = 1u << 8;
+            static constexpr uint32_t SSSE3 = 1u << 9;
+            static constexpr uint32_t CNXT_ID = 1u << 10;
+            static constexpr uint32_t SDBG = 1u << 11;
+            static constexpr uint32_t FMA = 1u << 12;
+            static constexpr uint32_t CX16 = 1u << 13;
+            static constexpr uint32_t XTPR = 1u << 14;
+            static constexpr uint32_t PDCM = 1u << 15;
+            static constexpr uint32_t PCID = 1u << 17;
+            static constexpr uint32_t DCA = 1u << 18;
+            static constexpr uint32_t SSE41 = 1u << 19;
+            static constexpr uint32_t SSE42 = 1u << 20;
+            static constexpr uint32_t X2APIC = 1u << 21;
+            static constexpr uint32_t MOVBE = 1u << 22;
+            static constexpr uint32_t POPCNT = 1u << 23;
+            static constexpr uint32_t TSC_DEADLINE = 1u << 24;
+            static constexpr uint32_t AES = 1u << 25;
+            static constexpr uint32_t XSAVE = 1u << 26;
+            static constexpr uint32_t OSXSAVE = 1u << 27;
+            static constexpr uint32_t AVX = 1u << 28;
+            static constexpr uint32_t F16C = 1u << 29;
+            static constexpr uint32_t RDRND = 1u << 30;
+            static constexpr uint32_t HYPERVISOR = 1u << 31;
+        };
+    };
+
 public:
     // CPUInfo class public methods will be added here
 };
