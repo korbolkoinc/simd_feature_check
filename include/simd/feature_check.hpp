@@ -54,9 +54,112 @@ namespace simd
 enum class Feature : uint32_t;
 namespace detail
 {
-class CPUInfo;
+class CPUInfo final
+{
+private:
+    enum FunctionID : uint32_t
+    {
+        VENDOR_INFO = 0x00000000,
+        FEATURE_FLAGS = 0x00000001,
+        EXTENDED_FEATURES = 0x00000007,
+        EXTENDED_STATE = 0x0000000D,
+        EXTENDED_FUNCTION_INFO = 0x80000001,
+        PROCESSOR_BRAND_STRING_1 = 0x80000002,
+        PROCESSOR_BRAND_STRING_2 = 0x80000003,
+        PROCESSOR_BRAND_STRING_3 = 0x80000004,
+        EXTENDED_FEATURES_FLAGS = 0x80000007,
+        AMX_FEATURES = 0x00000019
+    };
 
-}
+    struct FeatureRegisters
+    {
+        uint32_t eax;
+        uint32_t ebx;
+        uint32_t ecx;
+        uint32_t edx;
+    };
+
+    struct CpuidResult
+    {
+        uint32_t eax;
+        uint32_t ebx;
+        uint32_t ecx;
+        uint32_t edx;
+    };
+
+#if SIMD_ARCH_X86
+    static SIMD_ALWAYS_INLINE CpuidResult cpuid(uint32_t leaf,
+                                                uint32_t subleaf = 0) noexcept
+    {
+        CpuidResult result;
+
+#if SIMD_COMPILER_MSVC
+        int regs[4];
+        __cpuidex(regs, static_cast<int>(leaf), static_cast<int>(subleaf));
+        result.eax = static_cast<uint32_t>(regs[0]);
+        result.ebx = static_cast<uint32_t>(regs[1]);
+        result.ecx = static_cast<uint32_t>(regs[2]);
+        result.edx = static_cast<uint32_t>(regs[3]);
+#elif SIMD_COMPILER_GCC || SIMD_COMPILER_CLANG
+#if defined(__i386__) && defined(__PIC__)
+        __asm__ __volatile__("xchg %%ebx, %1;"
+                             "cpuid;"
+                             "xchg %%ebx, %1;"
+                             : "=a"(result.eax), "=r"(result.ebx),
+                               "=c"(result.ecx), "=d"(result.edx)
+                             : "0"(leaf), "2"(subleaf));
+#else
+        __cpuid_count(static_cast<int>(leaf), static_cast<int>(subleaf),
+                      result.eax, result.ebx, result.ecx, result.edx);
+#endif
+#else
+        (void)leaf;
+        (void)subleaf;
+        result.eax = result.ebx = result.ecx = result.edx = 0;
+#endif
+
+        return result;
+    }
+
+    static SIMD_ALWAYS_INLINE uint64_t xgetbv(uint32_t xcr) noexcept
+    {
+#if SIMD_COMPILER_MSVC
+        return _xgetbv(xcr);
+#elif (SIMD_COMPILER_GCC || SIMD_COMPILER_CLANG) && defined(__XSAVE__)
+        uint32_t eax, edx;
+        __asm__ __volatile__("xgetbv" : "=a"(eax), "=d"(edx) : "c"(xcr));
+        return (static_cast<uint64_t>(edx) << 32) | eax;
+#else
+        (void)xcr;
+        return 0;
+#endif
+    }
+#else
+    static SIMD_ALWAYS_INLINE CpuidResult cpuid(uint32_t leaf,
+                                                uint32_t subleaf = 0) noexcept
+    {
+        (void)leaf;
+        (void)subleaf;
+        return {0, 0, 0, 0};
+    }
+
+    static SIMD_ALWAYS_INLINE uint64_t xgetbv(uint32_t xcr) noexcept
+    {
+        (void)xcr;
+        return 0;
+    }
+#endif
+
+    static SIMD_ALWAYS_INLINE bool has_bit(uint32_t value,
+                                           uint32_t bit) noexcept
+    {
+        return (value & bit) != 0;
+    }
+
+public:
+    // CPUInfo class public methods will be added here
+};
+} // namespace detail
 
 enum class Feature : uint32_t
 {
