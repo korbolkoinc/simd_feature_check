@@ -55,7 +55,85 @@
 namespace simd
 {
 
-enum class Feature : uint32_t;
+enum class Feature : uint32_t
+{
+    NONE = 0,
+
+    // Legacy features
+    MMX = 1,
+    SSE = 2,
+    SSE2 = 3,
+    SSE3 = 4,
+    SSSE3 = 5,
+    SSE41 = 6,
+    SSE42 = 7,
+
+    // AVX features
+    AVX = 8,
+    AVX2 = 9,
+    FMA = 10,
+
+    // Special instructions
+    POPCNT = 11,
+    LZCNT = 12,
+    BMI1 = 13,
+    BMI2 = 14,
+    F16C = 15,
+    MOVBE = 16,
+
+    // AVX-512 Foundation
+    AVX512F = 17,
+    AVX512CD = 18,
+
+    // AVX-512 extensions
+    AVX512DQ = 19,
+    AVX512BW = 20,
+    AVX512VL = 21,
+    AVX512IFMA = 22,
+    AVX512VBMI = 23,
+    AVX512VBMI2 = 24,
+    AVX512VNNI = 25,
+    AVX512BITALG = 26,
+    AVX512VPOPCNTDQ = 27,
+    AVX512VP2INTERSECT = 28,
+    AVX512BF16 = 29,
+    AVX512FP16 = 30,
+
+    // Intel AMX
+    AMX_TILE = 31,
+    AMX_INT8 = 32,
+    AMX_BF16 = 33,
+
+    // Cryptographic extensions
+    AES = 34,
+    VAES = 35,
+    PCLMULQDQ = 36,
+    VPCLMULQDQ = 37,
+    SHA = 38,
+
+    // Misc extensions
+    RDRND = 39,
+    RDSEED = 40,
+    ADX = 41,
+
+    // Prefetch instructions
+    PREFETCHW = 42,
+    PREFETCHWT1 = 43,
+
+    // AVX-512 additional extensions
+    AVX512_4VNNIW = 44,
+    AVX512_4FMAPS = 45,
+    GFNI = 46,
+
+    // Misc
+    RDPID = 47,
+    SGX = 48,
+    CET_IBT = 49,
+    CET_SS = 50,
+
+    MAX_FEATURE = CET_SS + 1
+};
+
 namespace detail
 {
 class CPUInfo final
@@ -1036,87 +1114,119 @@ public:
         return "Unknown";
 #endif
     }
+
+    static SIMD_ALWAYS_INLINE bool has_feature(Feature feature) noexcept
+    {
+        switch (feature)
+        {
+            case Feature::NONE:
+                return true;
+            case Feature::MMX:
+                return has_mmx();
+            case Feature::SSE:
+                return has_sse();
+            case Feature::SSE2:
+                return has_sse2();
+            case Feature::SSE3:
+                return has_sse3();
+            case Feature::SSSE3:
+                return has_ssse3();
+            case Feature::SSE41:
+                return has_sse41();
+            case Feature::SSE42:
+                return has_sse42();
+            case Feature::AVX:
+                return has_avx();
+            case Feature::AVX2:
+                return has_avx2();
+            case Feature::FMA:
+                return has_fma();
+            case Feature::POPCNT:
+                return has_popcnt();
+            case Feature::LZCNT:
+                return has_lzcnt();
+            case Feature::BMI1:
+                return has_bmi1();
+            case Feature::BMI2:
+                return has_bmi2();
+            case Feature::F16C:
+                return has_f16c();
+            case Feature::MOVBE:
+                return has_movbe();
+            case Feature::AVX512F:
+                return has_avx512f();
+            case Feature::AVX512CD:
+                return has_avx512cd();
+            case Feature::AVX512DQ:
+                return has_avx512dq();
+            case Feature::AVX512BW:
+                return has_avx512bw();
+            case Feature::AVX512VL:
+                return has_avx512vl();
+            case Feature::AVX512IFMA:
+                return has_avx512ifma();
+            case Feature::AVX512VBMI:
+                return has_avx512vbmi();
+            case Feature::AVX512VBMI2:
+                return has_avx512vbmi2();
+            case Feature::AVX512VNNI:
+                return has_avx512vnni();
+            case Feature::AVX512BITALG:
+                return has_avx512bitalg();
+            case Feature::AVX512VPOPCNTDQ:
+                return has_avx512vpopcntdq();
+            case Feature::AVX512VP2INTERSECT:
+                return has_avx512vp2intersect();
+            case Feature::AVX512BF16:
+                return has_avx512bf16();
+            case Feature::AVX512FP16:
+                return has_avx512fp16();
+            case Feature::AMX_TILE:
+                return has_amx_tile();
+            case Feature::AMX_INT8:
+                return has_amx_int8();
+            case Feature::AMX_BF16:
+                return has_amx_bf16();
+            case Feature::AES:
+                return has_aes();
+            case Feature::VAES:
+                return has_vaes();
+            case Feature::PCLMULQDQ:
+                return has_pclmulqdq();
+            case Feature::VPCLMULQDQ:
+                return has_vpclmulqdq();
+            case Feature::SHA:
+                return has_sha();
+            case Feature::RDRND:
+                return has_rdrnd();
+            case Feature::RDSEED:
+                return has_rdseed();
+            case Feature::ADX:
+                return has_adx();
+            case Feature::PREFETCHW:
+                return has_prefetchw();
+            case Feature::PREFETCHWT1:
+                return has_prefetchwt1();
+            case Feature::AVX512_4VNNIW:
+                return has_avx512_4vnniw();
+            case Feature::AVX512_4FMAPS:
+                return has_avx512_4fmaps();
+            case Feature::GFNI:
+                return has_gfni();
+            case Feature::RDPID:
+                return has_rdpid();
+            case Feature::SGX:
+                return has_sgx();
+            case Feature::CET_IBT:
+                return has_cet_ibt();
+            case Feature::CET_SS:
+                return has_cet_ss();
+            default:
+                return false;
+        }
+    }
 };
 } // namespace detail
-
-enum class Feature : uint32_t
-{
-    NONE = 0,
-
-    // Legacy features
-    MMX = 1,
-    SSE = 2,
-    SSE2 = 3,
-    SSE3 = 4,
-    SSSE3 = 5,
-    SSE41 = 6,
-    SSE42 = 7,
-
-    // AVX features
-    AVX = 8,
-    AVX2 = 9,
-    FMA = 10,
-
-    // Special instructions
-    POPCNT = 11,
-    LZCNT = 12,
-    BMI1 = 13,
-    BMI2 = 14,
-    F16C = 15,
-    MOVBE = 16,
-
-    // AVX-512 Foundation
-    AVX512F = 17,
-    AVX512CD = 18,
-
-    // AVX-512 extensions
-    AVX512DQ = 19,
-    AVX512BW = 20,
-    AVX512VL = 21,
-    AVX512IFMA = 22,
-    AVX512VBMI = 23,
-    AVX512VBMI2 = 24,
-    AVX512VNNI = 25,
-    AVX512BITALG = 26,
-    AVX512VPOPCNTDQ = 27,
-    AVX512VP2INTERSECT = 28,
-    AVX512BF16 = 29,
-    AVX512FP16 = 30,
-
-    // Intel AMX
-    AMX_TILE = 31,
-    AMX_INT8 = 32,
-    AMX_BF16 = 33,
-
-    // Cryptographic extensions
-    AES = 34,
-    VAES = 35,
-    PCLMULQDQ = 36,
-    VPCLMULQDQ = 37,
-    SHA = 38,
-
-    // Misc extensions
-    RDRND = 39,
-    RDSEED = 40,
-    ADX = 41,
-
-    // Prefetch instructions
-    PREFETCHW = 42,
-    PREFETCHWT1 = 43,
-
-    // AVX-512 additional extensions
-    AVX512_4VNNIW = 44,
-    AVX512_4FMAPS = 45,
-    GFNI = 46,
-
-    // Misc
-    RDPID = 47,
-    SGX = 48,
-    CET_IBT = 49,
-    CET_SS = 50,
-
-    MAX_FEATURE = CET_SS + 1
-};
 
 inline int get_simd_support() { return 5; }
 
