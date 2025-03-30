@@ -334,6 +334,106 @@ private:
         };
     };
 
+    class CpuidData
+    {
+    private:
+        bool initialized;
+        FeatureRegisters regs1;
+        FeatureRegisters regs7_0;
+        FeatureRegisters regs7_1;
+        FeatureRegisters regs81;
+        uint64_t xcr0;
+
+    public:
+        constexpr CpuidData() noexcept
+            : initialized(false), regs1{0, 0, 0, 0}, regs7_0{0, 0, 0, 0},
+              regs7_1{0, 0, 0, 0}, regs81{0, 0, 0, 0}, xcr0(0)
+        {
+        }
+
+        void initialize() noexcept
+        {
+            if (!initialized)
+            {
+                CpuidResult res1 = cpuid(FunctionID::FEATURE_FLAGS);
+                regs1.eax = res1.eax;
+                regs1.ebx = res1.ebx;
+                regs1.ecx = res1.ecx;
+                regs1.edx = res1.edx;
+
+                CpuidResult res7_0 = cpuid(FunctionID::EXTENDED_FEATURES, 0);
+                regs7_0.eax = res7_0.eax;
+                regs7_0.ebx = res7_0.ebx;
+                regs7_0.ecx = res7_0.ecx;
+                regs7_0.edx = res7_0.edx;
+
+                if (res7_0.eax >= 1)
+                {
+                    CpuidResult res7_1 =
+                        cpuid(FunctionID::EXTENDED_FEATURES, 1);
+                    regs7_1.eax = res7_1.eax;
+                    regs7_1.ebx = res7_1.ebx;
+                    regs7_1.ecx = res7_1.ecx;
+                    regs7_1.edx = res7_1.edx;
+                }
+
+                CpuidResult res81 = cpuid(FunctionID::EXTENDED_FUNCTION_INFO);
+                regs81.eax = res81.eax;
+                regs81.ebx = res81.ebx;
+                regs81.ecx = res81.ecx;
+                regs81.edx = res81.edx;
+
+                if (has_bit(regs1.ecx, FeatureBits::ECX1::XSAVE) &&
+                    has_bit(regs1.ecx, FeatureBits::ECX1::OSXSAVE))
+                {
+                    xcr0 = xgetbv(0);
+                }
+
+                initialized = true;
+            }
+        }
+
+        constexpr const FeatureRegisters& get_regs1() const noexcept
+        {
+            return regs1;
+        }
+
+        constexpr const FeatureRegisters& get_regs7_0() const noexcept
+        {
+            return regs7_0;
+        }
+
+        constexpr const FeatureRegisters& get_regs7_1() const noexcept
+        {
+            return regs7_1;
+        }
+
+        constexpr const FeatureRegisters& get_regs81() const noexcept
+        {
+            return regs81;
+        }
+        
+        constexpr uint64_t get_xcr0() const noexcept { return xcr0; }
+    };
+
+    static CpuidData& get_cpuid_data() noexcept
+    {
+        static CpuidData data;
+        data.initialize();
+        return data;
+    }
+
+    static constexpr uint64_t XCR0_SSE_STATE = 0x2;
+    static constexpr uint64_t XCR0_AVX_STATE = 0x4;
+    static constexpr uint64_t XCR0_OPMASK_STATE = 0x20;
+    static constexpr uint64_t XCR0_ZMM_HI256_STATE = 0x40;
+    static constexpr uint64_t XCR0_HI16_ZMM_STATE = 0x80;
+
+    static constexpr uint64_t XCR0_AVX512_STATE =
+        XCR0_OPMASK_STATE | XCR0_ZMM_HI256_STATE | XCR0_HI16_ZMM_STATE;
+    static constexpr uint64_t XCR0_AVX_AVX512_STATE =
+        XCR0_AVX_STATE | XCR0_AVX512_STATE;
+
 public:
     // CPUInfo class public methods will be added here
 };
