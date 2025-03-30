@@ -549,6 +549,184 @@ public:
         return false;
 #endif
     }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512f() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        bool avx512f_supported = has_bit(regs.ebx, FeatureBits::EBX7::AVX512F);
+        bool osxsave_supported = has_bit(get_cpuid_data().get_regs1().ecx,
+                                         FeatureBits::ECX1::OSXSAVE);
+        uint64_t xcr0 = get_cpuid_data().get_xcr0();
+        bool avx512_enabled =
+            (xcr0 & XCR0_AVX_AVX512_STATE) == XCR0_AVX_AVX512_STATE;
+        return has_avx() && avx512f_supported && osxsave_supported &&
+               avx512_enabled;
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512cd() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx512f() && has_bit(regs.ebx, FeatureBits::EBX7::AVX512CD);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512dq() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx512f() && has_bit(regs.ebx, FeatureBits::EBX7::AVX512DQ);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512bw() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx512f() && has_bit(regs.ebx, FeatureBits::EBX7::AVX512BW);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512vl() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx512f() && has_bit(regs.ebx, FeatureBits::EBX7::AVX512VL);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512ifma() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx512f() &&
+               has_bit(regs.ebx, FeatureBits::EBX7::AVX512IFMA);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512vbmi() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx512f() &&
+               has_bit(regs.ecx, FeatureBits::ECX7::AVX512VBMI);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512vbmi2() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx512f() &&
+               has_bit(regs.ecx, FeatureBits::ECX7::AVX512VBMI2);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512vnni() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx512f() &&
+               has_bit(regs.ecx, FeatureBits::ECX7::AVX512VNNI);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512bitalg() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx512f() &&
+               has_bit(regs.ecx, FeatureBits::ECX7::AVX512BITALG);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512vpopcntdq() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx512f() &&
+               has_bit(regs.ecx, FeatureBits::ECX7::AVX512VPOPCNTDQ);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512fp16() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx512f() &&
+               has_bit(regs.edx, FeatureBits::EDX7::AVX512_FP16);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512bf16() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_1();
+        return has_avx512f() &&
+               has_bit(regs.eax, FeatureBits::EAX7_1::AVX512_BF16);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512vp2intersect() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx512f() &&
+               has_bit(regs.edx, FeatureBits::EDX7::AVX512_VP2INTERSECT);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512_4vnniw() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx512f() &&
+               has_bit(regs.edx, FeatureBits::EDX7::AVX512_4VNNIW);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_avx512_4fmaps() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_avx512f() &&
+               has_bit(regs.edx, FeatureBits::EDX7::AVX512_4FMAPS);
+#else
+        return false;
+#endif
+    }
 };
 } // namespace detail
 
