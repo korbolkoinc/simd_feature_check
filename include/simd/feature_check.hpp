@@ -1,7 +1,11 @@
 #ifndef SIMD_FEATURE_CHECK_d8nx78
 #define SIMD_FEATURE_CHECK_d8nx78
 
+#include <array>
 #include <cstdint>
+#include <cstring>
+#include <optional>
+#include <string>
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(i386) ||                 \
     defined(__i386__) || defined(_M_IX86)
@@ -955,6 +959,81 @@ public:
         return has_bit(regs.ecx, FeatureBits::ECX7::GFNI);
 #else
         return false;
+#endif
+    }
+
+    static std::string get_vendor_string() noexcept
+    {
+#if SIMD_ARCH_X86
+        char vendor[13] = {0};
+        CpuidResult res = cpuid(FunctionID::VENDOR_INFO);
+
+        std::memcpy(vendor, &res.ebx, 4);
+        std::memcpy(vendor + 4, &res.edx, 4);
+        std::memcpy(vendor + 8, &res.ecx, 4);
+
+        return std::string(vendor);
+#else
+        return "Unknown";
+#endif
+    }
+
+    static std::optional<std::array<int, 3>> get_processor_model() noexcept
+    {
+#if SIMD_ARCH_X86
+        CpuidResult res = cpuid(FunctionID::FEATURE_FLAGS);
+
+        int family_id = (res.eax >> 8) & 0xF;
+        int model_id = (res.eax >> 4) & 0xF;
+        int stepping_id = res.eax & 0xF;
+
+        int extended_family = 0;
+        int extended_model = 0;
+
+        if (family_id == 0xF)
+        {
+            extended_family = ((res.eax >> 20) & 0xFF);
+            family_id += extended_family;
+        }
+
+        if (family_id == 0xF || family_id == 0x6)
+        {
+            extended_model = ((res.eax >> 16) & 0xF);
+            model_id |= (extended_model << 4);
+        }
+
+        return std::array<int, 3>{family_id, model_id, stepping_id};
+#else
+        return std::nullopt;
+#endif
+    }
+
+    static std::string get_processor_brand_string() noexcept
+    {
+#if SIMD_ARCH_X86
+        char brand[49] = {0};
+        CpuidResult res1 = cpuid(FunctionID::PROCESSOR_BRAND_STRING_1);
+        CpuidResult res2 = cpuid(FunctionID::PROCESSOR_BRAND_STRING_2);
+        CpuidResult res3 = cpuid(FunctionID::PROCESSOR_BRAND_STRING_3);
+
+        std::memcpy(brand, &res1.eax, 4);
+        std::memcpy(brand + 4, &res1.ebx, 4);
+        std::memcpy(brand + 8, &res1.ecx, 4);
+        std::memcpy(brand + 12, &res1.edx, 4);
+
+        std::memcpy(brand + 16, &res2.eax, 4);
+        std::memcpy(brand + 20, &res2.ebx, 4);
+        std::memcpy(brand + 24, &res2.ecx, 4);
+        std::memcpy(brand + 28, &res2.edx, 4);
+
+        std::memcpy(brand + 32, &res3.eax, 4);
+        std::memcpy(brand + 36, &res3.ebx, 4);
+        std::memcpy(brand + 40, &res3.ecx, 4);
+        std::memcpy(brand + 44, &res3.edx, 4);
+
+        return std::string(brand);
+#else
+        return "Unknown";
 #endif
     }
 };
