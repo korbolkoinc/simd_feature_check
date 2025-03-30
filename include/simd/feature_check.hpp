@@ -412,7 +412,7 @@ private:
         {
             return regs81;
         }
-        
+
         constexpr uint64_t get_xcr0() const noexcept { return xcr0; }
     };
 
@@ -435,7 +435,75 @@ private:
         XCR0_AVX_STATE | XCR0_AVX512_STATE;
 
 public:
-    // CPUInfo class public methods will be added here
+    static SIMD_ALWAYS_INLINE bool has_mmx() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs1();
+        return has_bit(regs.edx, FeatureBits::EDX1::MMX);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_sse() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs1();
+        return has_bit(regs.edx, FeatureBits::EDX1::SSE);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_sse2() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs1();
+        return has_bit(regs.edx, FeatureBits::EDX1::SSE2);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_sse3() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs1();
+        return has_bit(regs.ecx, FeatureBits::ECX1::SSE3);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_ssse3() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs1();
+        return has_bit(regs.ecx, FeatureBits::ECX1::SSSE3);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_sse41() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs1();
+        return has_bit(regs.ecx, FeatureBits::ECX1::SSE41);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_sse42() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs1();
+        return has_bit(regs.ecx, FeatureBits::ECX1::SSE42);
+#else
+        return false;
+#endif
+    }
 };
 } // namespace detail
 
