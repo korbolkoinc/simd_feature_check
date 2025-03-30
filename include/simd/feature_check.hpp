@@ -319,6 +319,19 @@ private:
             static constexpr uint32_t CORE_CAPABILITIES = 1u << 30;
             static constexpr uint32_t SSBD = 1u << 31;
         };
+
+        struct EAX7_1
+        {
+            static constexpr uint32_t AVX512_BF16 = 1u << 5;
+        };
+
+        struct ECX81
+        {
+            static constexpr uint32_t LAHF = 1u << 0;
+            static constexpr uint32_t LZCNT = 1u << 5;
+            static constexpr uint32_t ABM = 1u << 5;
+            static constexpr uint32_t PREFETCHW = 1u << 8;
+        };
     };
 
 public:
