@@ -290,6 +290,35 @@ private:
             static constexpr uint32_t SGX_LC = 1u << 30;
             static constexpr uint32_t PKS = 1u << 31;
         };
+
+        struct EDX7
+        {
+            static constexpr uint32_t SGX_KEYS = 1u << 0;
+            static constexpr uint32_t AVX512_4VNNIW = 1u << 2;
+            static constexpr uint32_t AVX512_4FMAPS = 1u << 3;
+            static constexpr uint32_t FAST_SHORT_REP_MOV = 1u << 4;
+            static constexpr uint32_t UINTR = 1u << 5;
+            static constexpr uint32_t AVX512_VP2INTERSECT = 1u << 8;
+            static constexpr uint32_t SRBDS_CTRL = 1u << 9;
+            static constexpr uint32_t MD_CLEAR = 1u << 10;
+            static constexpr uint32_t RTM_ALWAYS_ABORT = 1u << 11;
+            static constexpr uint32_t TSX_FORCE_ABORT = 1u << 13;
+            static constexpr uint32_t SERIALIZE = 1u << 14;
+            static constexpr uint32_t HYBRID = 1u << 15;
+            static constexpr uint32_t TSXLDTRK = 1u << 16;
+            static constexpr uint32_t PCONFIG = 1u << 18;
+            static constexpr uint32_t CET_IBT = 1u << 20;
+            static constexpr uint32_t AMX_BF16 = 1u << 22;
+            static constexpr uint32_t AVX512_FP16 = 1u << 23;
+            static constexpr uint32_t AMX_TILE = 1u << 24;
+            static constexpr uint32_t AMX_INT8 = 1u << 25;
+            static constexpr uint32_t IBRS_IBPB = 1u << 26;
+            static constexpr uint32_t STIBP = 1u << 27;
+            static constexpr uint32_t L1D_FLUSH = 1u << 28;
+            static constexpr uint32_t ARCH_CAPABILITIES = 1u << 29;
+            static constexpr uint32_t CORE_CAPABILITIES = 1u << 30;
+            static constexpr uint32_t SSBD = 1u << 31;
+        };
     };
 
 public:
