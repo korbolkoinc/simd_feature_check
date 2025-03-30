@@ -727,6 +727,46 @@ public:
         return false;
 #endif
     }
+
+    static SIMD_ALWAYS_INLINE bool has_amx_tile() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_bit(regs.edx, FeatureBits::EDX7::AMX_TILE);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_amx_int8() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_amx_tile() && has_bit(regs.edx, FeatureBits::EDX7::AMX_INT8);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_amx_bf16() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs7_0();
+        return has_amx_tile() && has_bit(regs.edx, FeatureBits::EDX7::AMX_BF16);
+#else
+        return false;
+#endif
+    }
+
+    static SIMD_ALWAYS_INLINE bool has_popcnt() noexcept
+    {
+#if SIMD_ARCH_X86
+        const auto& regs = get_cpuid_data().get_regs1();
+        return has_bit(regs.ecx, FeatureBits::ECX1::POPCNT);
+#else
+        return false;
+#endif
+    }
 };
 } // namespace detail
 
