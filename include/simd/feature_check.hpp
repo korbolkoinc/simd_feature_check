@@ -261,6 +261,35 @@ private:
             static constexpr uint32_t AVX512BW = 1u << 30;
             static constexpr uint32_t AVX512VL = 1u << 31;
         };
+
+        struct ECX7
+        {
+            static constexpr uint32_t PREFETCHWT1 = 1u << 0;
+            static constexpr uint32_t AVX512VBMI = 1u << 1;
+            static constexpr uint32_t UMIP = 1u << 2;
+            static constexpr uint32_t PKU = 1u << 3;
+            static constexpr uint32_t OSPKE = 1u << 4;
+            static constexpr uint32_t WAITPKG = 1u << 5;
+            static constexpr uint32_t AVX512VBMI2 = 1u << 6;
+            static constexpr uint32_t CET_SS = 1u << 7;
+            static constexpr uint32_t GFNI = 1u << 8;
+            static constexpr uint32_t VAES = 1u << 9;
+            static constexpr uint32_t VPCLMULQDQ = 1u << 10;
+            static constexpr uint32_t AVX512VNNI = 1u << 11;
+            static constexpr uint32_t AVX512BITALG = 1u << 12;
+            static constexpr uint32_t TME_EN = 1u << 13;
+            static constexpr uint32_t AVX512VPOPCNTDQ = 1u << 14;
+            static constexpr uint32_t LA57 = 1u << 16;
+            static constexpr uint32_t RDPID = 1u << 22;
+            static constexpr uint32_t KL = 1u << 23;
+            static constexpr uint32_t BUS_LOCK_DETECT = 1u << 24;
+            static constexpr uint32_t CLDEMOTE = 1u << 25;
+            static constexpr uint32_t MOVDIRI = 1u << 27;
+            static constexpr uint32_t MOVDIR64B = 1u << 28;
+            static constexpr uint32_t ENQCMD = 1u << 29;
+            static constexpr uint32_t SGX_LC = 1u << 30;
+            static constexpr uint32_t PKS = 1u << 31;
+        };
     };
 
 public:
