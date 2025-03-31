@@ -2167,6 +2167,34 @@ SIMD_ALWAYS_INLINE Feature highest_feature() noexcept
     return Feature::NONE;
 }
 
+SIMD_ALWAYS_INLINE bool has_base_avx512() noexcept
+{
+    if constexpr (!compile_time::has_base_avx512())
+    {
+        return false;
+    }
+    else
+    {
+        return has<Feature::AVX512F>() && has<Feature::AVX512CD>() &&
+               has<Feature::AVX512DQ>() && has<Feature::AVX512BW>() &&
+               has<Feature::AVX512VL>();
+    }
+}
+
+SIMD_ALWAYS_INLINE bool has_full_avx512() noexcept
+{
+    if constexpr (!compile_time::has_full_avx512())
+    {
+        return false;
+    }
+    else
+    {
+        return has_base_avx512() && has<Feature::AVX512VNNI>() &&
+               has<Feature::AVX512VBMI>() && has<Feature::AVX512VBMI2>() &&
+               has<Feature::AVX512BITALG>() && has<Feature::AVX512VPOPCNTDQ>();
+    }
+}
+
 } // namespace runtime
 
 inline int get_simd_support() { return 5; }
