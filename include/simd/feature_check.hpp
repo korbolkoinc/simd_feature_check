@@ -2323,6 +2323,121 @@ inline std::string feature_to_string(Feature feature) noexcept
     }
 }
 
+template <Feature F>
+std::string FeatureDetector<F>::name() noexcept
+{
+    return feature_to_string(F);
+}
+
+inline std::optional<Feature> string_to_feature(const std::string& str) noexcept
+{
+    if (str == "None")
+        return Feature::NONE;
+    else if (str == "MMX")
+        return Feature::MMX;
+    else if (str == "SSE")
+        return Feature::SSE;
+    else if (str == "SSE2")
+        return Feature::SSE2;
+    else if (str == "SSE3")
+        return Feature::SSE3;
+    else if (str == "SSSE3")
+        return Feature::SSSE3;
+    else if (str == "SSE4.1" || str == "SSE41")
+        return Feature::SSE41;
+    else if (str == "SSE4.2" || str == "SSE42")
+        return Feature::SSE42;
+    else if (str == "AVX")
+        return Feature::AVX;
+    else if (str == "AVX2")
+        return Feature::AVX2;
+    else if (str == "FMA")
+        return Feature::FMA;
+    else if (str == "POPCNT")
+        return Feature::POPCNT;
+    else if (str == "LZCNT")
+        return Feature::LZCNT;
+    else if (str == "BMI1")
+        return Feature::BMI1;
+    else if (str == "BMI2")
+        return Feature::BMI2;
+    else if (str == "F16C")
+        return Feature::F16C;
+    else if (str == "MOVBE")
+        return Feature::MOVBE;
+    else if (str == "AVX512F")
+        return Feature::AVX512F;
+    else if (str == "AVX512CD")
+        return Feature::AVX512CD;
+    else if (str == "AVX512DQ")
+        return Feature::AVX512DQ;
+    else if (str == "AVX512BW")
+        return Feature::AVX512BW;
+    else if (str == "AVX512VL")
+        return Feature::AVX512VL;
+    else if (str == "AVX512IFMA")
+        return Feature::AVX512IFMA;
+    else if (str == "AVX512VBMI")
+        return Feature::AVX512VBMI;
+    else if (str == "AVX512VBMI2")
+        return Feature::AVX512VBMI2;
+    else if (str == "AVX512VNNI")
+        return Feature::AVX512VNNI;
+    else if (str == "AVX512BITALG")
+        return Feature::AVX512BITALG;
+    else if (str == "AVX512VPOPCNTDQ")
+        return Feature::AVX512VPOPCNTDQ;
+    else if (str == "AVX512VP2INTERSECT")
+        return Feature::AVX512VP2INTERSECT;
+    else if (str == "AVX512BF16")
+        return Feature::AVX512BF16;
+    else if (str == "AVX512FP16")
+        return Feature::AVX512FP16;
+    else if (str == "AMX-TILE" || str == "AMX_TILE")
+        return Feature::AMX_TILE;
+    else if (str == "AMX-INT8" || str == "AMX_INT8")
+        return Feature::AMX_INT8;
+    else if (str == "AMX-BF16" || str == "AMX_BF16")
+        return Feature::AMX_BF16;
+    else if (str == "AES")
+        return Feature::AES;
+    else if (str == "VAES")
+        return Feature::VAES;
+    else if (str == "PCLMULQDQ")
+        return Feature::PCLMULQDQ;
+    else if (str == "VPCLMULQDQ")
+        return Feature::VPCLMULQDQ;
+    else if (str == "SHA")
+        return Feature::SHA;
+    else if (str == "RDRND")
+        return Feature::RDRND;
+    else if (str == "RDSEED")
+        return Feature::RDSEED;
+    else if (str == "ADX")
+        return Feature::ADX;
+    else if (str == "PREFETCHW")
+        return Feature::PREFETCHW;
+    else if (str == "PREFETCHWT1")
+        return Feature::PREFETCHWT1;
+    else if (str == "AVX512-4VNNIW" || str == "AVX512_4VNNIW")
+        return Feature::AVX512_4VNNIW;
+    else if (str == "AVX512-4FMAPS" || str == "AVX512_4FMAPS")
+        return Feature::AVX512_4FMAPS;
+    else if (str == "GFNI")
+        return Feature::GFNI;
+    else if (str == "RDPID")
+        return Feature::RDPID;
+    else if (str == "SGX")
+        return Feature::SGX;
+    else if (str == "CET-IBT" || str == "CET_IBT")
+        return Feature::CET_IBT;
+    else if (str == "CET-SS" || str == "CET_SS")
+        return Feature::CET_SS;
+    else if (str == "MAX")
+        return Feature::MAX_FEATURE;
+    return std::nullopt;
+}
+
 inline int get_simd_support() { return 5; }
 
 } // namespace simd
