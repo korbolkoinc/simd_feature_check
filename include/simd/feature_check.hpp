@@ -1855,6 +1855,320 @@ constexpr bool has_full_avx512() noexcept
 
 } // namespace compile_time
 
+namespace runtime
+{
+template <Feature F>
+SIMD_ALWAYS_INLINE bool has() noexcept
+{
+    if constexpr (!compile_time::has<F>())
+    {
+        return false;
+    }
+    else
+    {
+        return detail::CPUInfo::has_feature(F);
+    }
+}
+
+SIMD_ALWAYS_INLINE Feature highest_feature() noexcept
+{
+    if constexpr (compile_time::has<Feature::CET_SS>())
+    {
+        if (has<Feature::CET_SS>())
+            return Feature::CET_SS;
+    }
+
+    if constexpr (compile_time::has<Feature::CET_IBT>())
+    {
+        if (has<Feature::CET_IBT>())
+            return Feature::CET_IBT;
+    }
+
+    if constexpr (compile_time::has<Feature::SGX>())
+    {
+        if (has<Feature::SGX>())
+            return Feature::SGX;
+    }
+
+    if constexpr (compile_time::has<Feature::RDPID>())
+    {
+        if (has<Feature::RDPID>())
+            return Feature::RDPID;
+    }
+
+    if constexpr (compile_time::has<Feature::GFNI>())
+    {
+        if (has<Feature::GFNI>())
+            return Feature::GFNI;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512_4FMAPS>())
+    {
+        if (has<Feature::AVX512_4FMAPS>())
+            return Feature::AVX512_4FMAPS;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512_4VNNIW>())
+    {
+        if (has<Feature::AVX512_4VNNIW>())
+            return Feature::AVX512_4VNNIW;
+    }
+
+    if constexpr (compile_time::has<Feature::PREFETCHWT1>())
+    {
+        if (has<Feature::PREFETCHWT1>())
+            return Feature::PREFETCHWT1;
+    }
+
+    if constexpr (compile_time::has<Feature::ADX>())
+    {
+        if (has<Feature::ADX>())
+            return Feature::ADX;
+    }
+
+    if constexpr (compile_time::has<Feature::RDSEED>())
+    {
+        if (has<Feature::RDSEED>())
+            return Feature::RDSEED;
+    }
+
+    if constexpr (compile_time::has<Feature::RDRND>())
+    {
+        if (has<Feature::RDRND>())
+            return Feature::RDRND;
+    }
+
+    if constexpr (compile_time::has<Feature::SHA>())
+    {
+        if (has<Feature::SHA>())
+            return Feature::SHA;
+    }
+    if constexpr (compile_time::has<Feature::VPCLMULQDQ>())
+    {
+        if (has<Feature::VPCLMULQDQ>())
+            return Feature::VPCLMULQDQ;
+    }
+
+    if constexpr (compile_time::has<Feature::PCLMULQDQ>())
+    {
+        if (has<Feature::PCLMULQDQ>())
+            return Feature::PCLMULQDQ;
+    }
+
+    if constexpr (compile_time::has<Feature::VAES>())
+    {
+        if (has<Feature::VAES>())
+            return Feature::VAES;
+    }
+
+    if constexpr (compile_time::has<Feature::AES>())
+    {
+        if (has<Feature::AES>())
+            return Feature::AES;
+    }
+
+    if constexpr (compile_time::has<Feature::AMX_BF16>())
+    {
+        if (has<Feature::AMX_BF16>())
+            return Feature::AMX_BF16;
+    }
+
+    if constexpr (compile_time::has<Feature::AMX_INT8>())
+    {
+        if (has<Feature::AMX_INT8>())
+            return Feature::AMX_INT8;
+    }
+
+    if constexpr (compile_time::has<Feature::AMX_TILE>())
+    {
+        if (has<Feature::AMX_TILE>())
+            return Feature::AMX_TILE;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512FP16>())
+    {
+        if (has<Feature::AVX512FP16>())
+            return Feature::AVX512FP16;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512BF16>())
+    {
+        if (has<Feature::AVX512BF16>())
+            return Feature::AVX512BF16;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512VP2INTERSECT>())
+    {
+        if (has<Feature::AVX512VP2INTERSECT>())
+            return Feature::AVX512VP2INTERSECT;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512VPOPCNTDQ>())
+    {
+        if (has<Feature::AVX512VPOPCNTDQ>())
+            return Feature::AVX512VPOPCNTDQ;
+    }
+    if constexpr (compile_time::has<Feature::AVX512BITALG>())
+    {
+        if (has<Feature::AVX512BITALG>())
+            return Feature::AVX512BITALG;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512VNNI>())
+    {
+        if (has<Feature::AVX512VNNI>())
+            return Feature::AVX512VNNI;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512VBMI2>())
+    {
+        if (has<Feature::AVX512VBMI2>())
+            return Feature::AVX512VBMI2;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512VBMI>())
+    {
+        if (has<Feature::AVX512VBMI>())
+            return Feature::AVX512VBMI;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512IFMA>())
+    {
+        if (has<Feature::AVX512IFMA>())
+            return Feature::AVX512IFMA;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512VL>())
+    {
+        if (has<Feature::AVX512VL>())
+            return Feature::AVX512VL;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512BW>())
+    {
+        if (has<Feature::AVX512BW>())
+            return Feature::AVX512BW;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512DQ>())
+    {
+        if (has<Feature::AVX512DQ>())
+            return Feature::AVX512DQ;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512CD>())
+    {
+        if (has<Feature::AVX512CD>())
+            return Feature::AVX512CD;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX512F>())
+    {
+        if (has<Feature::AVX512F>())
+            return Feature::AVX512F;
+    }
+
+    if constexpr (compile_time::has<Feature::MOVBE>())
+    {
+        if (has<Feature::MOVBE>())
+            return Feature::MOVBE;
+    }
+
+    if constexpr (compile_time::has<Feature::BMI2>())
+    {
+        if (has<Feature::BMI2>())
+            return Feature::BMI2;
+    }
+
+    if constexpr (compile_time::has<Feature::BMI1>())
+    {
+        if (has<Feature::BMI1>())
+            return Feature::BMI1;
+    }
+
+    if constexpr (compile_time::has<Feature::LZCNT>())
+    {
+        if (has<Feature::LZCNT>())
+            return Feature::LZCNT;
+    }
+
+    if constexpr (compile_time::has<Feature::POPCNT>())
+    {
+        if (has<Feature::POPCNT>())
+            return Feature::POPCNT;
+    }
+
+    if constexpr (compile_time::has<Feature::F16C>())
+    {
+        if (has<Feature::F16C>())
+            return Feature::F16C;
+    }
+
+    if constexpr (compile_time::has<Feature::FMA>())
+    {
+        if (has<Feature::FMA>())
+            return Feature::FMA;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX2>())
+    {
+        if (has<Feature::AVX2>())
+            return Feature::AVX2;
+    }
+
+    if constexpr (compile_time::has<Feature::AVX>())
+    {
+        if (has<Feature::AVX>())
+            return Feature::AVX;
+    }
+
+    if constexpr (compile_time::has<Feature::SSE42>())
+    {
+        if (has<Feature::SSE42>())
+            return Feature::SSE42;
+    }
+
+    if constexpr (compile_time::has<Feature::SSE41>())
+    {
+        if (has<Feature::SSE41>())
+            return Feature::SSE41;
+    }
+
+    if constexpr (compile_time::has<Feature::SSSE3>())
+    {
+        if (has<Feature::SSSE3>())
+            return Feature::SSSE3;
+    }
+
+    if constexpr (compile_time::has<Feature::SSE3>())
+    {
+        if (has<Feature::SSE3>())
+            return Feature::SSE3;
+    }
+
+    if constexpr (compile_time::has<Feature::SSE2>())
+    {
+        if (has<Feature::SSE2>())
+            return Feature::SSE2;
+    }
+
+    if constexpr (compile_time::has<Feature::SSE>())
+    {
+        if (has<Feature::SSE>())
+            return Feature::SSE;
+    }
+
+    if constexpr (compile_time::has<Feature::MMX>())
+    {
+        if (has<Feature::MMX>())
+            return Feature::MMX;
+    }
+
+    return Feature::NONE;
+}
+
+} // namespace runtime
+
 inline int get_simd_support() { return 5; }
 
 } // namespace simd
