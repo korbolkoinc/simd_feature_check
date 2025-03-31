@@ -1839,6 +1839,20 @@ constexpr Feature highest_feature() noexcept
 
 constexpr Feature max_feature = highest_feature();
 
+constexpr bool has_base_avx512() noexcept
+{
+    return has<Feature::AVX512F>() && has<Feature::AVX512CD>() &&
+           has<Feature::AVX512DQ>() && has<Feature::AVX512BW>() &&
+           has<Feature::AVX512VL>();
+}
+
+constexpr bool has_full_avx512() noexcept
+{
+    return has_base_avx512() && has<Feature::AVX512VNNI>() &&
+           has<Feature::AVX512VBMI>() && has<Feature::AVX512VBMI2>() &&
+           has<Feature::AVX512BITALG>() && has<Feature::AVX512VPOPCNTDQ>();
+}
+
 } // namespace compile_time
 
 inline int get_simd_support() { return 5; }
