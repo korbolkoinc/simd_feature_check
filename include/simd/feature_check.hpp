@@ -2197,6 +2197,132 @@ SIMD_ALWAYS_INLINE bool has_full_avx512() noexcept
 
 } // namespace runtime
 
+template <Feature F>
+struct FeatureDetector
+{
+    static constexpr bool compile_time = compile_time::has<F>();
+
+    static SIMD_ALWAYS_INLINE bool available() noexcept
+    {
+        return runtime::has<F>();
+    }
+
+    static std::string name() noexcept;
+};
+
+inline std::string feature_to_string(Feature feature) noexcept
+{
+    switch (feature)
+    {
+        case Feature::NONE:
+            return "None";
+        case Feature::MMX:
+            return "MMX";
+        case Feature::SSE:
+            return "SSE";
+        case Feature::SSE2:
+            return "SSE2";
+        case Feature::SSE3:
+            return "SSE3";
+        case Feature::SSSE3:
+            return "SSSE3";
+        case Feature::SSE41:
+            return "SSE4.1";
+        case Feature::SSE42:
+            return "SSE4.2";
+        case Feature::AVX:
+            return "AVX";
+        case Feature::AVX2:
+            return "AVX2";
+        case Feature::FMA:
+            return "FMA";
+        case Feature::POPCNT:
+            return "POPCNT";
+        case Feature::LZCNT:
+            return "LZCNT";
+        case Feature::BMI1:
+            return "BMI1";
+        case Feature::BMI2:
+            return "BMI2";
+        case Feature::F16C:
+            return "F16C";
+        case Feature::MOVBE:
+            return "MOVBE";
+        case Feature::AVX512F:
+            return "AVX512F";
+        case Feature::AVX512CD:
+            return "AVX512CD";
+        case Feature::AVX512DQ:
+            return "AVX512DQ";
+        case Feature::AVX512BW:
+            return "AVX512BW";
+        case Feature::AVX512VL:
+            return "AVX512VL";
+        case Feature::AVX512IFMA:
+            return "AVX512IFMA";
+        case Feature::AVX512VBMI:
+            return "AVX512VBMI";
+        case Feature::AVX512VBMI2:
+            return "AVX512VBMI2";
+        case Feature::AVX512VNNI:
+            return "AVX512VNNI";
+        case Feature::AVX512BITALG:
+            return "AVX512BITALG";
+        case Feature::AVX512VPOPCNTDQ:
+            return "AVX512VPOPCNTDQ";
+        case Feature::AVX512VP2INTERSECT:
+            return "AVX512VP2INTERSECT";
+        case Feature::AVX512BF16:
+            return "AVX512BF16";
+        case Feature::AVX512FP16:
+            return "AVX512FP16";
+        case Feature::AMX_TILE:
+            return "AMX-TILE";
+        case Feature::AMX_INT8:
+            return "AMX-INT8";
+        case Feature::AMX_BF16:
+            return "AMX-BF16";
+        case Feature::AES:
+            return "AES";
+        case Feature::VAES:
+            return "VAES";
+        case Feature::PCLMULQDQ:
+            return "PCLMULQDQ";
+        case Feature::VPCLMULQDQ:
+            return "VPCLMULQDQ";
+        case Feature::SHA:
+            return "SHA";
+        case Feature::RDRND:
+            return "RDRND";
+        case Feature::RDSEED:
+            return "RDSEED";
+        case Feature::ADX:
+            return "ADX";
+        case Feature::PREFETCHW:
+            return "PREFETCHW";
+        case Feature::PREFETCHWT1:
+            return "PREFETCHWT1";
+        case Feature::AVX512_4VNNIW:
+            return "AVX512-4VNNIW";
+        case Feature::AVX512_4FMAPS:
+            return "AVX512-4FMAPS";
+        case Feature::GFNI:
+            return "GFNI";
+        case Feature::RDPID:
+            return "RDPID";
+        case Feature::SGX:
+            return "SGX";
+        case Feature::CET_IBT:
+            return "CET-IBT";
+        case Feature::CET_SS:
+            return "CET-SS";
+        case Feature::MAX_FEATURE:
+            return "MAX";
+        default:
+            return "Unknown";
+    }
+}
+
 inline int get_simd_support() { return 5; }
 
 } // namespace simd
