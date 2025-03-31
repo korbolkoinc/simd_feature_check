@@ -1572,6 +1572,61 @@ public:
 #define SIMD_HAS_CET_SS 0
 #endif
 
+namespace compile_time
+{
+    
+constexpr bool mmx = SIMD_HAS_MMX != 0;
+constexpr bool sse = SIMD_HAS_SSE != 0;
+constexpr bool sse2 = SIMD_HAS_SSE2 != 0;
+constexpr bool sse3 = SIMD_HAS_SSE3 != 0;
+constexpr bool ssse3 = SIMD_HAS_SSSE3 != 0;
+constexpr bool sse41 = SIMD_HAS_SSE41 != 0;
+constexpr bool sse42 = SIMD_HAS_SSE42 != 0;
+constexpr bool avx = SIMD_HAS_AVX != 0;
+constexpr bool avx2 = SIMD_HAS_AVX2 != 0;
+constexpr bool fma = SIMD_HAS_FMA != 0;
+constexpr bool f16c = SIMD_HAS_F16C != 0;
+constexpr bool popcnt = SIMD_HAS_POPCNT != 0;
+constexpr bool lzcnt = SIMD_HAS_LZCNT != 0;
+constexpr bool bmi1 = SIMD_HAS_BMI1 != 0;
+constexpr bool bmi2 = SIMD_HAS_BMI2 != 0;
+constexpr bool movbe = SIMD_HAS_MOVBE != 0;
+constexpr bool avx512f = SIMD_HAS_AVX512F != 0;
+constexpr bool avx512cd = SIMD_HAS_AVX512CD != 0;
+constexpr bool avx512dq = SIMD_HAS_AVX512DQ != 0;
+constexpr bool avx512bw = SIMD_HAS_AVX512BW != 0;
+constexpr bool avx512vl = SIMD_HAS_AVX512VL != 0;
+constexpr bool avx512ifma = SIMD_HAS_AVX512IFMA != 0;
+constexpr bool avx512vbmi = SIMD_HAS_AVX512VBMI != 0;
+constexpr bool avx512vbmi2 = SIMD_HAS_AVX512VBMI2 != 0;
+constexpr bool avx512vnni = SIMD_HAS_AVX512VNNI != 0;
+constexpr bool avx512bitalg = SIMD_HAS_AVX512BITALG != 0;
+constexpr bool avx512vpopcntdq = SIMD_HAS_AVX512VPOPCNTDQ != 0;
+constexpr bool avx512vp2intersect = SIMD_HAS_AVX512VP2INTERSECT != 0;
+constexpr bool avx512bf16 = SIMD_HAS_AVX512BF16 != 0;
+constexpr bool avx512fp16 = SIMD_HAS_AVX512FP16 != 0;
+constexpr bool amx_tile = SIMD_HAS_AMX_TILE != 0;
+constexpr bool amx_int8 = SIMD_HAS_AMX_INT8 != 0;
+constexpr bool amx_bf16 = SIMD_HAS_AMX_BF16 != 0;
+constexpr bool aes = SIMD_HAS_AES != 0;
+constexpr bool vaes = SIMD_HAS_VAES != 0;
+constexpr bool pclmulqdq = SIMD_HAS_PCLMULQDQ != 0;
+constexpr bool vpclmulqdq = SIMD_HAS_VPCLMULQDQ != 0;
+constexpr bool sha = SIMD_HAS_SHA != 0;
+constexpr bool rdrnd = SIMD_HAS_RDRND != 0;
+constexpr bool rdseed = SIMD_HAS_RDSEED != 0;
+constexpr bool adx = SIMD_HAS_ADX != 0;
+constexpr bool prefetchwt1 = SIMD_HAS_PREFETCHWT1 != 0;
+constexpr bool avx512_4vnniw = SIMD_HAS_AVX512_4VNNIW != 0;
+constexpr bool avx512_4fmaps = SIMD_HAS_AVX512_4FMAPS != 0;
+constexpr bool gfni = SIMD_HAS_GFNI != 0;
+constexpr bool rdpid = SIMD_HAS_RDPID != 0;
+constexpr bool sgx = SIMD_HAS_SGX != 0;
+constexpr bool cet_ibt = SIMD_HAS_CET_IBT != 0;
+constexpr bool cet_ss = SIMD_HAS_CET_SS != 0;
+
+}
+
 inline int get_simd_support() { return 5; }
 
 } // namespace simd
