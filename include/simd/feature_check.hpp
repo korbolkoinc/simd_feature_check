@@ -1277,6 +1277,301 @@ public:
 };
 } // namespace detail
 
+// Template utilities for compile-time feature detection
+#if defined(__MMX__)
+#define SIMD_HAS_MMX 1
+#else
+#define SIMD_HAS_MMX 0
+#endif
+
+#if defined(__SSE__)
+#define SIMD_HAS_SSE 1
+#else
+#define SIMD_HAS_SSE 0
+#endif
+
+#if defined(__SSE2__)
+#define SIMD_HAS_SSE2 1
+#else
+#define SIMD_HAS_SSE2 0
+#endif
+
+#if defined(__SSE3__)
+#define SIMD_HAS_SSE3 1
+#else
+#define SIMD_HAS_SSE3 0
+#endif
+
+#if defined(__SSSE3__)
+#define SIMD_HAS_SSSE3 1
+#else
+#define SIMD_HAS_SSSE3 0
+#endif
+
+#if defined(__SSE4_1__)
+#define SIMD_HAS_SSE41 1
+#else
+#define SIMD_HAS_SSE41 0
+#endif
+
+#if defined(__SSE4_2__)
+#define SIMD_HAS_SSE42 1
+#else
+#define SIMD_HAS_SSE42 0
+#endif
+
+#if defined(__AVX__)
+#define SIMD_HAS_AVX 1
+#else
+#define SIMD_HAS_AVX 0
+#endif
+
+#if defined(__AVX2__)
+#define SIMD_HAS_AVX2 1
+#else
+#define SIMD_HAS_AVX2 0
+#endif
+
+#if defined(__FMA__)
+#define SIMD_HAS_FMA 1
+#else
+#define SIMD_HAS_FMA 0
+#endif
+
+#if defined(__F16C__)
+#define SIMD_HAS_F16C 1
+#else
+#define SIMD_HAS_F16C 0
+#endif
+
+#if defined(__POPCNT__)
+#define SIMD_HAS_POPCNT 1
+#else
+#define SIMD_HAS_POPCNT 0
+#endif
+
+#if defined(__LZCNT__)
+#define SIMD_HAS_LZCNT 1
+#else
+#define SIMD_HAS_LZCNT 0
+#endif
+
+#if defined(__BMI__)
+#define SIMD_HAS_BMI1 1
+#else
+#define SIMD_HAS_BMI1 0
+#endif
+
+#if defined(__BMI2__)
+#define SIMD_HAS_BMI2 1
+#else
+#define SIMD_HAS_BMI2 0
+#endif
+
+#if defined(__MOVBE__)
+#define SIMD_HAS_MOVBE 1
+#else
+#define SIMD_HAS_MOVBE 0
+#endif
+
+#if defined(__AVX512F__)
+#define SIMD_HAS_AVX512F 1
+#else
+#define SIMD_HAS_AVX512F 0
+#endif
+
+#if defined(__AVX512CD__)
+#define SIMD_HAS_AVX512CD 1
+#else
+#define SIMD_HAS_AVX512CD 0
+#endif
+
+#if defined(__AVX512DQ__)
+#define SIMD_HAS_AVX512DQ 1
+#else
+#define SIMD_HAS_AVX512DQ 0
+#endif
+
+#if defined(__AVX512BW__)
+#define SIMD_HAS_AVX512BW 1
+#else
+#define SIMD_HAS_AVX512BW 0
+#endif
+
+#if defined(__AVX512VL__)
+#define SIMD_HAS_AVX512VL 1
+#else
+#define SIMD_HAS_AVX512VL 0
+#endif
+
+#if defined(__AVX512IFMA__)
+#define SIMD_HAS_AVX512IFMA 1
+#else
+#define SIMD_HAS_AVX512IFMA 0
+#endif
+
+#if defined(__AVX512VBMI__)
+#define SIMD_HAS_AVX512VBMI 1
+#else
+#define SIMD_HAS_AVX512VBMI 0
+#endif
+
+#if defined(__AVX512VBMI2__)
+#define SIMD_HAS_AVX512VBMI2 1
+#else
+#define SIMD_HAS_AVX512VBMI2 0
+#endif
+
+#if defined(__AVX512VNNI__)
+#define SIMD_HAS_AVX512VNNI 1
+#else
+#define SIMD_HAS_AVX512VNNI 0
+#endif
+
+#if defined(__AVX512BITALG__)
+#define SIMD_HAS_AVX512BITALG 1
+#else
+#define SIMD_HAS_AVX512BITALG 0
+#endif
+
+#if defined(__AVX512VPOPCNTDQ__)
+#define SIMD_HAS_AVX512VPOPCNTDQ 1
+#else
+#define SIMD_HAS_AVX512VPOPCNTDQ 0
+#endif
+
+#if defined(__AVX512VP2INTERSECT__)
+#define SIMD_HAS_AVX512VP2INTERSECT 1
+#else
+#define SIMD_HAS_AVX512VP2INTERSECT 0
+#endif
+
+#if defined(__AVX512BF16__)
+#define SIMD_HAS_AVX512BF16 1
+#else
+#define SIMD_HAS_AVX512BF16 0
+#endif
+
+#if defined(__AVX512FP16__)
+#define SIMD_HAS_AVX512FP16 1
+#else
+#define SIMD_HAS_AVX512FP16 0
+#endif
+
+#if defined(__AMX_TILE__)
+#define SIMD_HAS_AMX_TILE 1
+#else
+#define SIMD_HAS_AMX_TILE 0
+#endif
+
+#if defined(__AMX_INT8__)
+#define SIMD_HAS_AMX_INT8 1
+#else
+#define SIMD_HAS_AMX_INT8 0
+#endif
+
+#if defined(__AMX_BF16__)
+#define SIMD_HAS_AMX_BF16 1
+#else
+#define SIMD_HAS_AMX_BF16 0
+#endif
+
+#if defined(__AES__)
+#define SIMD_HAS_AES 1
+#else
+#define SIMD_HAS_AES 0
+#endif
+
+#if defined(__VAES__)
+#define SIMD_HAS_VAES 1
+#else
+#define SIMD_HAS_VAES 0
+#endif
+
+#if defined(__PCLMUL__)
+#define SIMD_HAS_PCLMULQDQ 1
+#else
+#define SIMD_HAS_PCLMULQDQ 0
+#endif
+
+#if defined(__VPCLMULQDQ__)
+#define SIMD_HAS_VPCLMULQDQ 1
+#else
+#define SIMD_HAS_VPCLMULQDQ 0
+#endif
+
+#if defined(__SHA__)
+#define SIMD_HAS_SHA 1
+#else
+#define SIMD_HAS_SHA 0
+#endif
+
+#if defined(__RDRND__)
+#define SIMD_HAS_RDRND 1
+#else
+#define SIMD_HAS_RDRND 0
+#endif
+
+#if defined(__RDSEED__)
+#define SIMD_HAS_RDSEED 1
+#else
+#define SIMD_HAS_RDSEED 0
+#endif
+
+#if defined(__ADX__)
+#define SIMD_HAS_ADX 1
+#else
+#define SIMD_HAS_ADX 0
+#endif
+
+#if defined(__PREFETCHWT1__)
+#define SIMD_HAS_PREFETCHWT1 1
+#else
+#define SIMD_HAS_PREFETCHWT1 0
+#endif
+
+#if defined(__AVX512_4VNNIW__)
+#define SIMD_HAS_AVX512_4VNNIW 1
+#else
+#define SIMD_HAS_AVX512_4VNNIW 0
+#endif
+
+#if defined(__AVX512_4FMAPS__)
+#define SIMD_HAS_AVX512_4FMAPS 1
+#else
+#define SIMD_HAS_AVX512_4FMAPS 0
+#endif
+
+#if defined(__GFNI__)
+#define SIMD_HAS_GFNI 1
+#else
+#define SIMD_HAS_GFNI 0
+#endif
+
+#if defined(__RDPID__)
+#define SIMD_HAS_RDPID 1
+#else
+#define SIMD_HAS_RDPID 0
+#endif
+
+#if defined(__SGX__)
+#define SIMD_HAS_SGX 1
+#else
+#define SIMD_HAS_SGX 0
+#endif
+
+#if defined(__CET_IBT__)
+#define SIMD_HAS_CET_IBT 1
+#else
+#define SIMD_HAS_CET_IBT 0
+#endif
+
+#if defined(__CET_SS__)
+#define SIMD_HAS_CET_SS 1
+#else
+#define SIMD_HAS_CET_SS 0
+#endif
+
 inline int get_simd_support() { return 5; }
 
 } // namespace simd
