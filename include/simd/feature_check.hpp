@@ -1574,7 +1574,7 @@ public:
 
 namespace compile_time
 {
-    
+
 constexpr bool mmx = SIMD_HAS_MMX != 0;
 constexpr bool sse = SIMD_HAS_SSE != 0;
 constexpr bool sse2 = SIMD_HAS_SSE2 != 0;
@@ -1625,7 +1625,116 @@ constexpr bool sgx = SIMD_HAS_SGX != 0;
 constexpr bool cet_ibt = SIMD_HAS_CET_IBT != 0;
 constexpr bool cet_ss = SIMD_HAS_CET_SS != 0;
 
+template <Feature F>
+static constexpr bool has() noexcept
+{
+    if constexpr (F == Feature::MMX)
+        return mmx;
+    else if constexpr (F == Feature::SSE)
+        return sse;
+    else if constexpr (F == Feature::SSE2)
+        return sse2;
+    else if constexpr (F == Feature::SSE3)
+        return sse3;
+    else if constexpr (F == Feature::SSSE3)
+        return ssse3;
+    else if constexpr (F == Feature::SSE41)
+        return sse41;
+    else if constexpr (F == Feature::SSE42)
+        return sse42;
+    else if constexpr (F == Feature::AVX)
+        return avx;
+    else if constexpr (F == Feature::AVX2)
+        return avx2;
+    else if constexpr (F == Feature::FMA)
+        return fma;
+    else if constexpr (F == Feature::F16C)
+        return f16c;
+    else if constexpr (F == Feature::POPCNT)
+        return popcnt;
+    else if constexpr (F == Feature::LZCNT)
+        return lzcnt;
+    else if constexpr (F == Feature::BMI1)
+        return bmi1;
+    else if constexpr (F == Feature::BMI2)
+        return bmi2;
+    else if constexpr (F == Feature::MOVBE)
+        return movbe;
+    else if constexpr (F == Feature::AVX512F)
+        return avx512f;
+    else if constexpr (F == Feature::AVX512CD)
+        return avx512cd;
+    else if constexpr (F == Feature::AVX512DQ)
+        return avx512dq;
+    else if constexpr (F == Feature::AVX512BW)
+        return avx512bw;
+    else if constexpr (F == Feature::AVX512VL)
+        return avx512vl;
+    else if constexpr (F == Feature::AVX512IFMA)
+        return avx512ifma;
+    else if constexpr (F == Feature::AVX512VBMI)
+        return avx512vbmi;
+    else if constexpr (F == Feature::AVX512VBMI2)
+        return avx512vbmi2;
+    else if constexpr (F == Feature::AVX512VNNI)
+        return avx512vnni;
+    else if constexpr (F == Feature::AVX512BITALG)
+        return avx512bitalg;
+    else if constexpr (F == Feature::AVX512VPOPCNTDQ)
+        return avx512vpopcntdq;
+    else if constexpr (F == Feature::AVX512VP2INTERSECT)
+        return avx512vp2intersect;
+    else if constexpr (F == Feature::AVX512BF16)
+        return avx512bf16;
+    else if constexpr (F == Feature::AVX512FP16)
+        return avx512fp16;
+    else if constexpr (F == Feature::AMX_TILE)
+        return amx_tile;
+    else if constexpr (F == Feature::AMX_INT8)
+        return amx_int8;
+    else if constexpr (F == Feature::AMX_BF16)
+        return amx_bf16;
+    else if constexpr (F == Feature::AES)
+        return aes;
+    else if constexpr (F == Feature::VAES)
+        return vaes;
+    else if constexpr (F == Feature::PCLMULQDQ)
+        return pclmulqdq;
+    else if constexpr (F == Feature::VPCLMULQDQ)
+        return vpclmulqdq;
+    else if constexpr (F == Feature::SHA)
+        return sha;
+    else if constexpr (F == Feature::RDRND)
+        return rdrnd;
+    else if constexpr (F == Feature::RDSEED)
+        return rdseed;
+    else if constexpr (F == Feature::ADX)
+        return adx;
+    else if constexpr (F == Feature::PREFETCHW)
+        return false;
+    else if constexpr (F == Feature::PREFETCHWT1)
+        return prefetchwt1;
+    else if constexpr (F == Feature::AVX512_4VNNIW)
+        return avx512_4vnniw;
+    else if constexpr (F == Feature::AVX512_4FMAPS)
+        return avx512_4fmaps;
+    else if constexpr (F == Feature::GFNI)
+        return gfni;
+    else if constexpr (F == Feature::RDPID)
+        return rdpid;
+    else if constexpr (F == Feature::SGX)
+        return sgx;
+    else if constexpr (F == Feature::CET_IBT)
+        return cet_ibt;
+    else if constexpr (F == Feature::CET_SS)
+        return cet_ss;
+    else if constexpr (F == Feature::NONE)
+        return true;
+    else
+        return false;
 }
+
+} // namespace compile_time
 
 inline int get_simd_support() { return 5; }
 
