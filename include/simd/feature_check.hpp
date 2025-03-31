@@ -6,6 +6,7 @@
 #include <cstring>
 #include <optional>
 #include <string>
+#include <vector>
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(i386) ||                 \
     defined(__i386__) || defined(_M_IX86)
@@ -2436,6 +2437,85 @@ inline std::optional<Feature> string_to_feature(const std::string& str) noexcept
     else if (str == "MAX")
         return Feature::MAX_FEATURE;
     return std::nullopt;
+}
+
+SIMD_ALWAYS_INLINE bool has_feature(Feature feature) noexcept
+{
+    return detail::CPUInfo::has_feature(feature);
+}
+
+SIMD_ALWAYS_INLINE Feature highest_feature() noexcept
+{
+    return runtime::highest_feature();
+}
+
+inline std::vector<std::string> get_supported_features() noexcept
+{
+    std::vector<std::string> features;
+    features.reserve(static_cast<size_t>(Feature::MAX_FEATURE) + 1);
+
+    for (uint32_t i = 0; i <= static_cast<uint32_t>(Feature::MAX_FEATURE); ++i)
+    {
+        Feature f = static_cast<Feature>(i);
+        if (has_feature(f))
+        {
+            features.push_back(feature_to_string(f));
+        }
+    }
+
+    return features;
+}
+
+SIMD_ALWAYS_INLINE bool has_base_avx512() noexcept
+{
+    return runtime::has_base_avx512();
+}
+
+SIMD_ALWAYS_INLINE bool has_full_avx512() noexcept
+{
+    return runtime::has_full_avx512();
+}
+
+inline std::string get_cpu_vendor() noexcept
+{
+    return detail::CPUInfo::get_vendor_string();
+}
+
+inline std::optional<std::array<int, 3>> get_cpu_model() noexcept
+{
+    return detail::CPUInfo::get_processor_model();
+}
+
+inline std::string get_processor_brand() noexcept
+{
+    return detail::CPUInfo::get_processor_brand_string();
+}
+
+template <typename Func>
+SIMD_ALWAYS_INLINE Func dispatch_simd(Func sse_impl, Func avx_impl,
+                                      Func avx2_impl, Func avx512_impl,
+                                      Func fallback_impl) noexcept
+{
+    if (has_feature(Feature::AVX512F) && avx512_impl != nullptr)
+    {
+        return avx512_impl;
+    }
+    else if (has_feature(Feature::AVX2) && avx2_impl != nullptr)
+    {
+        return avx2_impl;
+    }
+    else if (has_feature(Feature::AVX) && avx_impl != nullptr)
+    {
+        return avx_impl;
+    }
+    else if (has_feature(Feature::SSE2) && sse_impl != nullptr)
+    {
+        return sse_impl;
+    }
+    else
+    {
+        return fallback_impl;
+    }
 }
 
 inline int get_simd_support() { return 5; }
