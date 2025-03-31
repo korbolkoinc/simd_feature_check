@@ -1226,6 +1226,55 @@ public:
         }
     }
 };
+
+class CpuidVersionInfo final
+{
+private:
+    uint32_t stepping_id_;
+    uint32_t model_id_;
+    uint32_t family_id_;
+    uint32_t processor_type_;
+    uint32_t extended_model_id_;
+    uint32_t extended_family_id_;
+
+public:
+    explicit CpuidVersionInfo(uint32_t raw_eax) noexcept
+        : stepping_id_((raw_eax) & 0xF), model_id_((raw_eax >> 4) & 0xF),
+          family_id_((raw_eax >> 8) & 0xF),
+          processor_type_((raw_eax >> 12) & 0x3),
+          extended_model_id_((raw_eax >> 16) & 0xF),
+          extended_family_id_((raw_eax >> 20) & 0xFF)
+    {
+    }
+
+    SIMD_ALWAYS_INLINE uint32_t stepping_id() const noexcept
+    {
+        return stepping_id_;
+    }
+
+    SIMD_ALWAYS_INLINE uint32_t model_id() const noexcept
+    {
+        if (family_id_ == 0x6 || family_id_ == 0xF)
+        {
+            return (extended_model_id_ << 4) | model_id_;
+        }
+        return model_id_;
+    }
+
+    SIMD_ALWAYS_INLINE uint32_t family_id() const noexcept
+    {
+        if (family_id_ == 0xF)
+        {
+            return family_id_ + extended_family_id_;
+        }
+        return family_id_;
+    }
+
+    SIMD_ALWAYS_INLINE uint32_t processor_type() const noexcept
+    {
+        return processor_type_;
+    }
+};
 } // namespace detail
 
 inline int get_simd_support() { return 5; }
