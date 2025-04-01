@@ -4,8 +4,16 @@
 
 int main()
 {
-    int simd_support = simd::get_simd_support();
-    (void)printf("SIMD support level: %d\n", simd_support);
+    // ...
+    // Example usage of SIMD feature detection
+    if (simd::has_feature(simd::Feature::AVX512F))
+    {
+        std::printf("AVX512F is supported.\n");
+    }
+    else
+    {
+        std::printf("AVX512F is not supported.\n");
+    }
 
     return 0;
 }

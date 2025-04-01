@@ -2799,8 +2799,6 @@ inline std::string get_library_version() noexcept
     return version;
 }
 
-inline int get_simd_support() { return 5; }
-
 } // namespace simd
 
 #endif /* End of include guard: SIMD_FEATURE_CHECK_d8nx78 */
