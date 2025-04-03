@@ -1156,6 +1156,27 @@ public:
     T hmin() const { return ops::horizontal_min(registers.data()); }
 
     T hmax() const { return ops::horizontal_max(registers.data()); }
+
+    Vector shuffle(const std::array<int, N>& indices) const
+    {
+        Vector result;
+        ops::shuffle(result.data(), registers.data(), indices.data());
+        return result;
+    }
+
+    Vector blend(const Vector& rhs, const mask_type& mask) const
+    {
+        Vector result;
+        ops::blend(result.data(), registers.data(), rhs.data(), mask._data());
+        return result;
+    }
+
+    static Vector select(const mask_type& mask, const Vector& a, const Vector& b)
+    {
+        Vector result;
+        ops::select(result.data(), mask._data(), a.data(), b.data());
+        return result;
+    }
 };
 
 } // namespace vector_simd
