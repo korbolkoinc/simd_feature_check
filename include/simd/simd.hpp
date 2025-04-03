@@ -316,6 +316,63 @@ struct simd_width<uint64_t, avx512_tag>
     static constexpr size_t value = 8;
 };
 
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
+template <>
+struct simd_width<float, neon_tag>
+{
+    static constexpr size_t value = 4;
+};
+
+template <>
+struct simd_width<int8_t, neon_tag>
+{
+    static constexpr size_t value = 16;
+};
+
+template <>
+struct simd_width<uint8_t, neon_tag>
+{
+    static constexpr size_t value = 16;
+};
+
+template <>
+struct simd_width<int16_t, neon_tag>
+{
+    static constexpr size_t value = 8;
+};
+
+template <>
+struct simd_width<uint16_t, neon_tag>
+{
+    static constexpr size_t value = 8;
+};
+
+template <>
+struct simd_width<int32_t, neon_tag>
+{
+    static constexpr size_t value = 4;
+};
+
+template <>
+struct simd_width<uint32_t, neon_tag>
+{
+    static constexpr size_t value = 4;
+};
+
+template <>
+struct simd_width<int64_t, neon_tag>
+{
+    static constexpr size_t value = 2;
+};
+
+template <>
+struct simd_width<uint64_t, neon_tag>
+{
+    static constexpr size_t value = 2;
+};
+
+#endif
+
 } // namespace detail
 
 } // namespace vector_simd
