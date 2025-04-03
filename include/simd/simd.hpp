@@ -1223,6 +1223,27 @@ public:
     using value_type = bool;
     using size_type = size_t;
     static constexpr size_t size_value = N;
+
+    Mask() { m_ops::set_false(registers.data()); }
+
+    explicit Mask(bool value)
+    {
+        if (value)
+        {
+            m_ops::set_true(registers.data());
+        }
+        else
+        {
+            m_ops::set_false(registers.data());
+        }
+    }
+
+    explicit Mask(const bool* ptr) { m_ops::load(registers.data(), ptr); }
+
+    Mask(const Mask&) = default;
+    Mask(Mask&&) = default;
+    Mask& operator=(const Mask&) = default;
+    Mask& operator=(Mask&&) = default;
 };
 
 } // namespace vector_simd
