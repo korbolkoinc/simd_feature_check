@@ -22,11 +22,10 @@ constexpr size_t kDefaultAlignment =
 
 template <typename T>
 concept SimdArithmetic =
-    std::is_same_v<T, float> || std::is_same_v<T, double> ||
-    std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t> ||
-    std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t> ||
-    std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t> ||
-    std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>;
+    std::is_same_v<T, float> || std::is_same_v<T, double> || std::is_same_v<T, int8_t> ||
+    std::is_same_v<T, uint8_t> || std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t> ||
+    std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t> || std::is_same_v<T, int64_t> ||
+    std::is_same_v<T, uint64_t>;
 
 template <typename T>
 concept SimdFloat = std::is_same_v<T, float> || std::is_same_v<T, double>;
@@ -35,14 +34,12 @@ template <typename T>
 concept SimdInteger = SimdArithmetic<T> && !SimdFloat<T>;
 
 template <typename T>
-concept SimdSignedInteger =
-    std::is_same_v<T, int8_t> || std::is_same_v<T, int16_t> ||
-    std::is_same_v<T, int32_t> || std::is_same_v<T, int64_t>;
+concept SimdSignedInteger = std::is_same_v<T, int8_t> || std::is_same_v<T, int16_t> ||
+                            std::is_same_v<T, int32_t> || std::is_same_v<T, int64_t>;
 
 template <typename T>
-concept SimdUnsignedInteger =
-    std::is_same_v<T, uint8_t> || std::is_same_v<T, uint16_t> ||
-    std::is_same_v<T, uint32_t> || std::is_same_v<T, uint64_t>;
+concept SimdUnsignedInteger = std::is_same_v<T, uint8_t> || std::is_same_v<T, uint16_t> ||
+                              std::is_same_v<T, uint32_t> || std::is_same_v<T, uint64_t>;
 
 // Forward declarations
 template <SimdArithmetic T, size_t N>
@@ -733,7 +730,6 @@ template <>
 struct mask_register_type<uint64_t, neon_tag>
 {
     using type = uint64x2_t;
-
 };
 
 template <>
@@ -773,10 +769,7 @@ class vector_base
 {
 protected:
     Derived& derived() { return static_cast<Derived&>(*this); }
-    const Derived& derived() const
-    {
-        return static_cast<const Derived&>(*this);
-    }
+    const Derived& derived() const { return static_cast<const Derived&>(*this); }
 
 public:
     using value_type = T;
@@ -842,6 +835,11 @@ public:
 };
 
 } // namespace detail
+
+template <SimdArithmetic T, size_t N>
+class alignas(kDefaultAlignment) Vector : public detail::vector_base<Vector<T, N>, T, N>
+{
+};
 
 } // namespace vector_simd
 
