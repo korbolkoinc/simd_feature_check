@@ -839,6 +839,46 @@ public:
 template <SimdArithmetic T, size_t N>
 class alignas(kDefaultAlignment) Vector : public detail::vector_base<Vector<T, N>, T, N>
 {
+private:
+    using ops = detail::vector_ops<T, N>;
+    using m_ops = detail::mask_ops<T, N>;
+    using mem_ops = detail::memory_ops<T, N>;
+    using math = detail::math_ops<T, N>;
+
+    static constexpr size_t native_width = detail::native_width<T>::value;
+    static constexpr size_t storage_size = (N + native_width - 1) / native_width * native_width;
+
+    using register_t = typename detail::register_type<T, detail::current_isa>::type;
+    static constexpr size_t num_registers =
+        (storage_size + detail::simd_width<T, detail::current_isa>::value - 1) /
+        detail::simd_width<T, detail::current_isa>::value;
+
+    alignas(kDefaultAlignment) std::array<register_t, num_registers> registers;
+
+public:
+    using value_type = T;
+    using mask_type = Mask<T, N>;
+    using size_type = size_t;
+    static constexpr size_t size_value = N;
+
+    Vector() = default;
+
+    explicit Vector(T value) { ops::set1(registers.data(), value); }
+
+    explicit Vector(const T* ptr) { mem_ops::load(registers.data(), ptr); }
+
+    Vector(const Vector&) = default;
+    Vector(Vector&&) = default;
+    Vector& operator=(const Vector&) = default;
+    Vector& operator=(Vector&&) = default;
+
+    Vector(std::initializer_list<T> values)
+    {
+        std::array<T, storage_size> tmp{};
+        size_t count = std::min(values.size(), storage_size);
+        std::copy_n(values.begin(), count, tmp.begin());
+        mem_ops::load(registers.data(), tmp.data());
+    }
 };
 
 } // namespace vector_simd
