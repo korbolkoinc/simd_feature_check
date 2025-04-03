@@ -879,6 +879,23 @@ public:
         std::copy_n(values.begin(), count, tmp.begin());
         mem_ops::load(registers.data(), tmp.data());
     }
+
+    register_t* data() { return registers.data(); }
+    const register_t* data() const { return registers.data(); }
+
+    SIMD_INLINE T extract(size_t i) const
+    {
+        assert(i < N && "Index out of bounds");
+        return ops::extract(registers.data(), i);
+    }
+
+    SIMD_INLINE void insert(size_t i, T value)
+    {
+        assert(i < N && "Index out of bounds");
+        ops::insert(registers.data(), i, value);
+    }
+
+    
 };
 
 } // namespace vector_simd
