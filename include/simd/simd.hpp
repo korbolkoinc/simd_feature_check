@@ -1203,6 +1203,28 @@ public:
     static void prefetch(const T* ptr, int hint = 0) { mem_ops::prefetch(ptr, hint); }
 };
 
+template <SimdArithmetic T, size_t N>
+class alignas(kDefaultAlignment) Mask
+{
+private:
+    using m_ops = detail::mask_ops<T, N>;
+    friend class Vector<T, N>;
+
+    using mask_register_t = typename detail::mask_register_type<T, detail::current_isa>::type;
+    static constexpr size_t native_width = detail::native_width<T>::value;
+    static constexpr size_t storage_size = (N + native_width - 1) / native_width * native_width;
+    static constexpr size_t num_registers =
+        (storage_size + detail::simd_width<T, detail::current_isa>::value - 1) /
+        detail::simd_width<T, detail::current_isa>::value;
+
+    alignas(kDefaultAlignment) std::array<mask_register_t, num_registers> registers;
+
+public:
+    using value_type = bool;
+    using size_type = size_t;
+    static constexpr size_t size_value = N;
+};
+
 } // namespace vector_simd
 
 #endif /* End of include guard: SIMD_HPP_al9nn6 */
