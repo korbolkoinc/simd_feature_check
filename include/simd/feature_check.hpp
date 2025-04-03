@@ -2527,198 +2527,247 @@ template <>
 struct is_supported_on_arch<Feature::MMX, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::SSE, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::SSE2, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::SSE3, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::SSSE3, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::SSE41, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::SSE42, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX2, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::FMA, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::POPCNT, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::LZCNT, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::BMI1, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::BMI2, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::F16C, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::MOVBE, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512F, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512CD, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512DQ, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512BW, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512VL, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512IFMA, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512VBMI, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512VBMI2, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512VNNI, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512BITALG, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512VPOPCNTDQ, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512VP2INTERSECT, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512BF16, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512FP16, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AMX_TILE, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AMX_INT8, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AMX_BF16, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AES, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::VAES, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::PCLMULQDQ, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::VPCLMULQDQ, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::SHA, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::RDRND, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::RDSEED, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::ADX, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::PREFETCHW, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::PREFETCHWT1, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512_4VNNIW, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::AVX512_4FMAPS, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::GFNI, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::RDPID, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::SGX, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::CET_IBT, 1> : std::true_type
 {
 };
+
 template <>
 struct is_supported_on_arch<Feature::CET_SS, 1> : std::true_type
 {
@@ -2749,8 +2798,6 @@ inline std::string get_library_version() noexcept
     version += std::to_string(SIMD_SUPPORT_VERSION_PATCH);
     return version;
 }
-
-inline int get_simd_support() { return 5; }
 
 } // namespace simd
 
