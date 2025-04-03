@@ -1244,6 +1244,16 @@ public:
     Mask(Mask&&) = default;
     Mask& operator=(const Mask&) = default;
     Mask& operator=(Mask&&) = default;
+
+    mask_register_t* _data() { return registers.data(); }
+    const mask_register_t* _data() const { return registers.data(); }
+
+    SIMD_INLINE bool operator[](size_t i) const
+    {
+        assert(i < N && "Index out of bounds");
+        return m_ops::extract(registers.data(), i);
+    }
+    
 };
 
 } // namespace vector_simd
