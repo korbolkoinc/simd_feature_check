@@ -450,6 +450,69 @@ struct register_type<uint64_t, sse2_tag>
     using type = __m128i;
 };
 
+// AVX register type mappings
+
+template <>
+struct register_type<float, avx_tag>
+{
+    using type = __m256;
+};
+
+template <>
+struct register_type<double, avx_tag>
+{
+    using type = __m256d;
+};
+
+template <>
+struct register_type<int8_t, avx_tag>
+{
+    using type = __m256i;
+};
+
+template <>
+struct register_type<uint8_t, avx_tag>
+{
+    using type = __m256i;
+};
+
+template <>
+struct register_type<int16_t, avx_tag>
+{
+    using type = __m256i;
+};
+
+template <>
+struct register_type<uint16_t, avx_tag>
+{
+    using type = __m256i;
+};
+
+template <>
+struct register_type<int32_t, avx_tag>
+{
+    using type = __m256i;
+};
+
+template <>
+struct register_type<uint32_t, avx_tag>
+{
+    using type = __m256i;
+};
+
+template <>
+struct register_type<int64_t, avx_tag>
+{
+    using type = __m256i;
+};
+
+template <>
+struct register_type<uint64_t, avx_tag>
+{
+    using type = __m256i;
+};
+
+
 } // namespace detail
 
 } // namespace vector_simd
