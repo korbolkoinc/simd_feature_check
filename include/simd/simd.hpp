@@ -1199,6 +1199,8 @@ public:
         ops::convert(result.data(), registers.data());
         return result;
     }
+
+    static void prefetch(const T* ptr, int hint = 0) { mem_ops::prefetch(ptr, hint); }
 };
 
 } // namespace vector_simd
