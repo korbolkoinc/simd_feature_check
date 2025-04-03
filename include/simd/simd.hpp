@@ -586,6 +586,7 @@ struct register_type<uint64_t, avx512_tag>
 // NEON register type mappings (if needed)
 
 #if defined(__ARM_NEON) || defined(__ARM_NEON__)
+
 template <>
 struct register_type<float, neon_tag>
 {
@@ -649,7 +650,34 @@ struct register_type<double, neon_tag>
     using type = double;
 #endif
 };
+
 #endif
+
+template <typename T>
+struct register_type<T, generic_tag>
+{
+    using type = T;
+};
+
+template <typename T, typename ISA>
+struct mask_register_type;
+
+template <typename T>
+struct mask_register_type<T, sse2_tag>
+{
+    using type = typename register_type<T, sse2_tag>::type;
+};
+
+template <typename T>
+struct mask_register_type<T, avx_tag>
+{
+    using type = typename register_type<T, avx_tag>::type;
+};
+
+template <typename T>
+struct mask_register_type<T, avx2_tag> : mask_register_type<T, avx_tag>
+{
+};
 
 } // namespace detail
 
