@@ -895,6 +895,39 @@ public:
         ops::insert(registers.data(), i, value);
     }
 
+    static Vector load(const T* ptr)
+    {
+        Vector result;
+        mem_ops::load(result.data(), ptr);
+        return result;
+    }
+
+    static Vector load_aligned(const T* ptr)
+    {
+        Vector result;
+        mem_ops::load_aligned(result.data(), ptr);
+        return result;
+    }
+
+    static Vector load_unaligned(const T* ptr)
+    {
+        Vector result;
+        mem_ops::load_unaligned(result.data(), ptr);
+        return result;
+    }
+
+    void store(T* ptr) const { mem_ops::store(registers.data(), ptr); }
+
+    void store_aligned(T* ptr) const { mem_ops::store_aligned(registers.data(), ptr); }
+
+    void store_unaligned(T* ptr) const { mem_ops::store_unaligned(registers.data(), ptr); }
+
+    std::array<T, N> to_array() const
+    {
+        std::array<T, N> result;
+        store(result.data());
+        return result;
+    }
     
 };
 
