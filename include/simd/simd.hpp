@@ -679,6 +679,77 @@ struct mask_register_type<T, avx2_tag> : mask_register_type<T, avx_tag>
 {
 };
 
+#ifdef __AVX512F__
+
+template <>
+struct mask_register_type<float, neon_tag>
+{
+    using type = uint32x4_t;
+};
+
+template <>
+struct mask_register_type<int8_t, neon_tag>
+{
+    using type = uint8x16_t;
+};
+
+template <>
+struct mask_register_type<uint8_t, neon_tag>
+{
+    using type = uint8x16_t;
+};
+
+template <>
+struct mask_register_type<int16_t, neon_tag>
+{
+    using type = uint16x8_t;
+};
+
+template <>
+struct mask_register_type<uint16_t, neon_tag>
+{
+    using type = uint16x8_t;
+};
+
+template <>
+struct mask_register_type<int32_t, neon_tag>
+{
+    using type = uint32x4_t;
+};
+
+template <>
+struct mask_register_type<uint32_t, neon_tag>
+{
+    using type = uint32x4_t;
+};
+
+template <>
+struct mask_register_type<int64_t, neon_tag>
+{
+    using type = uint64x2_t;
+};
+
+template <>
+struct mask_register_type<uint64_t, neon_tag>
+{
+    using type = uint64x2_t;
+
+};
+
+template <>
+struct mask_register_type<double, neon_tag>
+{
+#ifdef __aarch64__
+    using type = uint64x2_t;
+#else
+    using type = bool;
+#endif
+};
+
+#endif
+
+
+
 } // namespace detail
 
 } // namespace vector_simd
