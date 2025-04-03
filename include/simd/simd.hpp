@@ -1150,6 +1150,12 @@ public:
         ops::max(result.data(), registers.data(), rhs.data());
         return result;
     }
+
+    T hsum() const { return ops::horizontal_sum(registers.data()); }
+    
+    T hmin() const { return ops::horizontal_min(registers.data()); }
+
+    T hmax() const { return ops::horizontal_max(registers.data()); }
 };
 
 } // namespace vector_simd
