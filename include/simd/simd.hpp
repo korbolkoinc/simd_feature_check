@@ -1541,6 +1541,64 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
 #endif
         }
     }
+
+    static SIMD_INLINE void add(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_add_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_add_pd(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>)
+        {
+            *dst = _mm_add_epi8(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>)
+        {
+            *dst = _mm_add_epi16(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>)
+        {
+            *dst = _mm_add_epi32(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>)
+        {
+            *dst = _mm_add_epi64(*a, *b);
+        }
+    }
+
+    static SIMD_INLINE void sub(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_sub_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_sub_pd(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>)
+        {
+            *dst = _mm_sub_epi8(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>)
+        {
+            *dst = _mm_sub_epi16(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>)
+        {
+            *dst = _mm_sub_epi32(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>)
+        {
+            *dst = _mm_sub_epi64(*a, *b);
+        }
+    }
+    
+    
 };
 
 }
