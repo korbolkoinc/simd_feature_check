@@ -1253,7 +1253,52 @@ public:
         assert(i < N && "Index out of bounds");
         return m_ops::extract(registers.data(), i);
     }
-    
+
+    Mask operator&(const Mask& rhs) const
+    {
+        Mask result;
+        m_ops::logical_and(result._data(), registers.data(), rhs._data());
+        return result;
+    }
+
+    Mask operator|(const Mask& rhs) const
+    {
+        Mask result;
+        m_ops::logical_or(result._data(), registers.data(), rhs._data());
+        return result;
+    }
+
+    Mask operator^(const Mask& rhs) const
+    {
+        Mask result;
+        m_ops::logical_xor(result._data(), registers.data(), rhs._data());
+        return result;
+    }
+
+    Mask operator~() const
+    {
+        Mask result;
+        m_ops::logical_not(result._data(), registers.data());
+        return result;
+    }
+
+    Mask& operator&=(const Mask& rhs)
+    {
+        m_ops::logical_and(registers.data(), registers.data(), rhs._data());
+        return *this;
+    }
+
+    Mask& operator|=(const Mask& rhs)
+    {
+        m_ops::logical_or(registers.data(), registers.data(), rhs._data());
+        return *this;
+    }
+
+    Mask& operator^=(const Mask& rhs)
+    {
+        m_ops::logical_xor(registers.data(), registers.data(), rhs._data());
+        return *this;
+    }
 };
 
 } // namespace vector_simd
