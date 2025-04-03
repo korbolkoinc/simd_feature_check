@@ -1192,7 +1192,13 @@ public:
         return result;
     }
 
-    
+    template <typename U, std::enable_if_t<std::is_convertible_v<T, U>, int> = 0>
+    Vector<U, N> convert() const
+    {
+        Vector<U, N> result;
+        ops::convert(result.data(), registers.data());
+        return result;
+    }
 };
 
 } // namespace vector_simd
