@@ -1355,6 +1355,54 @@ using uint32_vn = uint32_v<detail::native_width<uint32_t>::value>;
 using int64_vn = int64_v<detail::native_width<int64_t>::value>;
 using uint64_vn = uint64_v<detail::native_width<uint64_t>::value>;
 
+#if SIMD_ARCH_X86 && SIMD_HAS_SSE2
+
+namespace detail
+{
+
+template <typename T, size_t N>
+struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2>::compile_time>>
+{
+    using register_t = typename register_type<T, sse2_tag>::type;
+
+    static SIMD_INLINE void set1(register_t* dst, T value)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_set1_ps(value);
+        }
+
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_set1_pd(value);
+        }
+
+        else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>)
+        {
+            *dst = _mm_set1_epi8(static_cast<char>(value));
+        }
+
+        else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>)
+        {
+            *dst = _mm_set1_epi16(static_cast<short>(value));
+        }
+
+        else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>)
+        {
+            *dst = _mm_set1_epi32(static_cast<int>(value));
+        }
+        
+        else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>)
+        {
+            *dst = _mm_set1_epi64x(static_cast<long long>(value));
+        }
+    }
+};
+
+}
+
+#endif
+
 } // namespace vector_simd
 
 #endif /* End of include guard: SIMD_HPP_al9nn6 */
