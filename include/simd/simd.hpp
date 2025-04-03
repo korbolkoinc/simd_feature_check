@@ -1136,6 +1136,20 @@ public:
         math::log(result.data(), registers.data());
         return result;
     }
+
+    Vector min(const Vector& rhs) const
+    {
+        Vector result;
+        ops::min(result.data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    Vector max(const Vector& rhs) const
+    {
+        Vector result;
+        ops::max(result.data(), registers.data(), rhs.data());
+        return result;
+    }
 };
 
 } // namespace vector_simd
