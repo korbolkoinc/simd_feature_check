@@ -1391,10 +1391,96 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
         {
             *dst = _mm_set1_epi32(static_cast<int>(value));
         }
-        
+
         else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>)
         {
             *dst = _mm_set1_epi64x(static_cast<long long>(value));
+        }
+    }
+
+    static SIMD_INLINE T extract(const register_t* src, size_t index)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            alignas(16) float tmp[4];
+            _mm_store_ps(tmp, *src);
+            return tmp[index % 4];
+        }
+
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(16) double tmp[2];
+            _mm_store_pd(tmp, *src);
+            return tmp[index % 2];
+        }
+
+        else if constexpr (std::is_same_v<T, int8_t>)
+        {
+#if SIMD_SSE4_1
+            return static_cast<int8_t>(_mm_extract_epi8(*src, index % 16));
+#else
+            alignas(16) int8_t tmp[16];
+            _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
+            return tmp[index % 16];
+#endif
+        }
+
+        else if constexpr (std::is_same_v<T, uint8_t>)
+        {
+#if SIMD_SSE4_1
+            return static_cast<uint8_t>(_mm_extract_epi8(*src, index % 16));
+#else
+            alignas(16) uint8_t tmp[16];
+            _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
+            return tmp[index % 16];
+#endif
+        }
+
+        else if constexpr (std::is_same_v<T, int16_t>)
+        {
+            alignas(16) int16_t tmp[8];
+            _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
+            return tmp[index % 8];
+        }
+
+        else if constexpr (std::is_same_v<T, uint16_t>)
+        {
+            alignas(16) uint16_t tmp[8];
+            _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
+            return tmp[index % 8];
+        }
+
+        else if constexpr (std::is_same_v<T, int32_t>)
+        {
+#if SIMD_SSE4_1
+            return static_cast<int32_t>(_mm_extract_epi32(*src, index % 4));
+#else
+            alignas(16) int32_t tmp[4];
+            _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
+            return tmp[index % 4];
+#endif
+        }
+
+        else if constexpr (std::is_same_v<T, uint32_t>)
+        {
+#if SIMD_SSE4_1
+            return static_cast<uint32_t>(_mm_extract_epi32(*src, index % 4));
+#else
+            alignas(16) uint32_t tmp[4];
+            _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
+            return tmp[index % 4];
+#endif
+        }
+        
+        else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>)
+        {
+#if SIMD_SSE4_1
+            return static_cast<T>(_mm_extract_epi64(*src, index % 2));
+#else
+            alignas(16) T tmp[2];
+            _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
+            return tmp[index % 2];
+#endif
         }
     }
 };
