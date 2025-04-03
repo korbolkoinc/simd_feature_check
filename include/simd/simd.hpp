@@ -943,6 +943,58 @@ public:
     {
         mem_ops::scatter(registers.data(), base, indices.data());
     }
+
+    Vector operator+(const Vector& rhs) const
+    {
+        Vector result;
+        ops::add(result.data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    Vector operator-(const Vector& rhs) const
+    {
+        Vector result;
+        ops::sub(result.data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    Vector operator*(const Vector& rhs) const
+    {
+        Vector result;
+        ops::mul(result.data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    Vector operator/(const Vector& rhs) const
+    {
+        Vector result;
+        ops::div(result.data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    Vector& operator+=(const Vector& rhs)
+    {
+        ops::add(registers.data(), registers.data(), rhs.data());
+        return *this;
+    }
+
+    Vector& operator-=(const Vector& rhs)
+    {
+        ops::sub(registers.data(), registers.data(), rhs.data());
+        return *this;
+    }
+
+    Vector& operator*=(const Vector& rhs)
+    {
+        ops::mul(registers.data(), registers.data(), rhs.data());
+        return *this;
+    }
+
+    Vector& operator/=(const Vector& rhs)
+    {
+        ops::div(registers.data(), registers.data(), rhs.data());
+        return *this;
+    }
 };
 
 } // namespace vector_simd
