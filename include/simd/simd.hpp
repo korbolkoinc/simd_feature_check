@@ -98,6 +98,34 @@ struct wasm_simd_tag : generic_tag
 {
 };
 
+struct best_available_tag
+{
+    using type = std::conditional_t<
+        simd::compile_time::has<simd::Feature::AVX512F>(), avx512_tag,
+        std::conditional_t<
+            simd::compile_time::has<simd::Feature::AVX2>(), avx2_tag,
+            std::conditional_t<
+                simd::compile_time::has<simd::Feature::AVX>(), avx_tag,
+                std::conditional_t<
+                    simd::compile_time::has<simd::Feature::SSE42>(), sse4_2_tag,
+                    std::conditional_t<
+                        simd::compile_time::has<simd::Feature::SSE41>(), sse4_1_tag,
+                        std::conditional_t<
+                            simd::compile_time::has<simd::Feature::SSSE3>(), ssse3_tag,
+                            std::conditional_t<
+                                simd::compile_time::has<simd::Feature::SSE3>(), sse3_tag,
+                                std::conditional_t<simd::compile_time::has<simd::Feature::SSE2>(),
+                                                   sse2_tag, generic_tag
+                                >
+                            >
+                        >
+                    >
+                >
+            >
+        >
+    >;
+};
+
 } // namespace detail
 
 } // namespace vector_simd
