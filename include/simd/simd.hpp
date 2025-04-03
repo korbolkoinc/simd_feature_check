@@ -373,6 +373,83 @@ struct simd_width<uint64_t, neon_tag>
 
 #endif
 
+// Generic fallback for unsupported architectures
+
+template <typename T>
+struct simd_width<T, generic_tag>
+{
+    static constexpr size_t value = 1;
+};
+
+template <typename T>
+struct native_width
+{
+    static constexpr size_t value = simd_width<T, current_isa>::value;
+};
+
+template <typename T, typename ISA>
+struct register_type;
+
+template <>
+struct register_type<float, sse2_tag>
+{
+    using type = __m128;
+};
+
+template <>
+struct register_type<double, sse2_tag>
+{
+    using type = __m128d;
+};
+
+template <>
+struct register_type<int8_t, sse2_tag>
+{
+    using type = __m128i;
+};
+
+template <>
+struct register_type<uint8_t, sse2_tag>
+{
+    using type = __m128i;
+};
+
+template <>
+struct register_type<int16_t, sse2_tag>
+{
+    using type = __m128i;
+};
+
+template <>
+struct register_type<uint16_t, sse2_tag>
+{
+    using type = __m128i;
+};
+
+template <>
+struct register_type<int32_t, sse2_tag>
+{
+    using type = __m128i;
+};
+
+template <>
+struct register_type<uint32_t, sse2_tag>
+{
+    using type = __m128i;
+};
+
+template <>
+struct register_type<int64_t, sse2_tag>
+{
+    using type = __m128i;
+};
+
+template <>
+struct register_type<uint64_t, sse2_tag>
+{
+    using type = __m128i;
+};
+
 } // namespace detail
 
 } // namespace vector_simd
