@@ -1083,6 +1083,59 @@ public:
         m_ops::cmp_ge(result._data(), registers.data(), rhs.data());
         return result;
     }
+
+    Vector abs() const
+    {
+        Vector result;
+        math::abs(result.data(), registers.data());
+        return result;
+    }
+
+    Vector sqrt() const
+    {
+        Vector result;
+        math::sqrt(result.data(), registers.data());
+        return result;
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    Vector sin() const
+    {
+        Vector result;
+        math::sin(result.data(), registers.data());
+        return result;
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    Vector cos() const
+    {
+        Vector result;
+        math::cos(result.data(), registers.data());
+        return result;
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    Vector tan() const
+    {
+        Vector result;
+        math::tan(result.data(), registers.data());
+        return result;
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    Vector exp() const
+    {
+        Vector result;
+        math::exp(result.data(), registers.data());
+        return result;
+    }
+
+    Vector log() const
+    {
+        Vector result;
+        math::log(result.data(), registers.data());
+        return result;
+    }
 };
 
 } // namespace vector_simd
