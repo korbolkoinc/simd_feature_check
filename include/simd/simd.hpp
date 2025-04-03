@@ -44,6 +44,62 @@ concept SimdUnsignedInteger =
     std::is_same_v<T, uint8_t> || std::is_same_v<T, uint16_t> ||
     std::is_same_v<T, uint32_t> || std::is_same_v<T, uint64_t>;
 
+// Forward declarations
+template <SimdArithmetic T, size_t N>
+class Vector;
+
+template <SimdArithmetic T, size_t N>
+class Mask;
+
+namespace detail
+{
+
+struct generic_tag
+{
+};
+
+struct sse2_tag : generic_tag
+{
+};
+
+struct sse3_tag : sse2_tag
+{
+};
+
+struct ssse3_tag : sse3_tag
+{
+};
+
+struct sse4_1_tag : ssse3_tag
+{
+};
+
+struct sse4_2_tag : sse4_1_tag
+{
+};
+
+struct avx_tag : sse4_2_tag
+{
+};
+
+struct avx2_tag : avx_tag
+{
+};
+
+struct avx512_tag : avx2_tag
+{
+};
+
+struct neon_tag : generic_tag
+{
+};
+
+struct wasm_simd_tag : generic_tag
+{
+};
+
+} // namespace detail
+
 } // namespace vector_simd
 
 #endif /* End of include guard: SIMD_HPP_al9nn6 */
