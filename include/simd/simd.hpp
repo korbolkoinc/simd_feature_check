@@ -512,6 +512,76 @@ struct register_type<uint64_t, avx_tag>
     using type = __m256i;
 };
 
+// Same register types for AVX2
+
+template <typename T>
+struct register_type<T, avx2_tag> : register_type<T, avx_tag>
+{
+};
+
+#ifdef __AVX512F__
+
+template <>
+struct register_type<float, avx512_tag>
+{
+    using type = __m512;
+};
+
+template <>
+struct register_type<double, avx512_tag>
+{
+    using type = __m512d;
+};
+
+template <>
+struct register_type<int8_t, avx512_tag>
+{
+    using type = __m512i;
+};
+
+template <>
+struct register_type<uint8_t, avx512_tag>
+{
+    using type = __m512i;
+};
+
+template <>
+struct register_type<int16_t, avx512_tag>
+{
+    using type = __m512i;
+};
+
+template <>
+struct register_type<uint16_t, avx512_tag>
+{
+    using type = __m512i;
+};
+
+template <>
+struct register_type<int32_t, avx512_tag>
+{
+    using type = __m512i;
+};
+
+template <>
+struct register_type<uint32_t, avx512_tag>
+{
+    using type = __m512i;
+};
+
+template <>
+struct register_type<int64_t, avx512_tag>
+{
+    using type = __m512i;
+};
+
+template <>
+struct register_type<uint64_t, avx512_tag>
+{
+    using type = __m512i;
+};
+
+#endif
 
 } // namespace detail
 
