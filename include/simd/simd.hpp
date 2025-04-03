@@ -930,6 +930,19 @@ public:
         return result;
     }
 
+    template <typename IndexT>
+    static Vector gather(const T* base, const Vector<IndexT, N>& indices)
+    {
+        Vector result;
+        mem_ops::gather(result.data(), base, indices.data());
+        return result;
+    }
+
+    template <typename IndexT>
+    void scatter(T* base, const Vector<IndexT, N>& indices) const
+    {
+        mem_ops::scatter(registers.data(), base, indices.data());
+    }
 };
 
 } // namespace vector_simd
