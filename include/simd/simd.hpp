@@ -583,6 +583,74 @@ struct register_type<uint64_t, avx512_tag>
 
 #endif
 
+// NEON register type mappings (if needed)
+
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
+template <>
+struct register_type<float, neon_tag>
+{
+    using type = float32x4_t;
+};
+
+template <>
+struct register_type<int8_t, neon_tag>
+{
+    using type = int8x16_t;
+};
+
+template <>
+struct register_type<uint8_t, neon_tag>
+{
+    using type = uint8x16_t;
+};
+
+template <>
+struct register_type<int16_t, neon_tag>
+{
+    using type = int16x8_t;
+};
+
+template <>
+struct register_type<uint16_t, neon_tag>
+{
+    using type = uint16x8_t;
+};
+
+template <>
+struct register_type<int32_t, neon_tag>
+{
+    using type = int32x4_t;
+};
+
+template <>
+struct register_type<uint32_t, neon_tag>
+{
+    using type = uint32x4_t;
+};
+
+template <>
+struct register_type<int64_t, neon_tag>
+{
+    using type = int64x2_t;
+};
+
+template <>
+struct register_type<uint64_t, neon_tag>
+{
+    using type = uint64x2_t;
+};
+
+template <>
+struct register_type<double, neon_tag>
+{
+#ifdef __aarch64__
+    using type = float64x2_t;
+#else
+    using type = double;
+#endif
+};
+#endif
+
 } // namespace detail
 
 } // namespace vector_simd
