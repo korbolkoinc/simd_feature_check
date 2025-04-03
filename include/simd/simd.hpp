@@ -1177,6 +1177,22 @@ public:
         ops::select(result.data(), mask._data(), a.data(), b.data());
         return result;
     }
+
+    Vector fmadd(const Vector& a, const Vector& b) const
+    {
+        Vector result;
+        math::fmadd(result.data(), registers.data(), a.data(), b.data());
+        return result;
+    }
+
+    Vector fmsub(const Vector& a, const Vector& b) const
+    {
+        Vector result;
+        math::fmsub(result.data(), registers.data(), a.data(), b.data());
+        return result;
+    }
+
+    
 };
 
 } // namespace vector_simd
