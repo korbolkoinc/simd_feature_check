@@ -1299,6 +1299,25 @@ public:
         m_ops::logical_xor(registers.data(), registers.data(), rhs._data());
         return *this;
     }
+
+    uint64_t to_bitmask() const { return m_ops::to_bitmask(registers.data()); }
+
+    bool any() const { return m_ops::any(registers.data()); }
+
+    bool all() const { return m_ops::all(registers.data()); }
+
+    bool none() const { return !any(); }
+
+    int count() const { return m_ops::count(registers.data()); }
+
+    void store(bool* ptr) const { m_ops::store(registers.data(), ptr); }
+
+    std::array<bool, N> to_array() const
+    {
+        std::array<bool, N> result;
+        store(result.data());
+        return result;
+    }
 };
 
 } // namespace vector_simd
