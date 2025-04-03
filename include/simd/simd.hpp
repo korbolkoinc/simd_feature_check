@@ -1041,6 +1041,48 @@ public:
         ops::bitwise_xor(registers.data(), registers.data(), rhs.data());
         return *this;
     }
+
+    mask_type operator==(const Vector& rhs) const
+    {
+        mask_type result;
+        m_ops::cmp_eq(result._data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    mask_type operator!=(const Vector& rhs) const
+    {
+        mask_type result;
+        m_ops::cmp_neq(result._data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    mask_type operator<(const Vector& rhs) const
+    {
+        mask_type result;
+        m_ops::cmp_lt(result._data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    mask_type operator<=(const Vector& rhs) const
+    {
+        mask_type result;
+        m_ops::cmp_le(result._data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    mask_type operator>(const Vector& rhs) const
+    {
+        mask_type result;
+        m_ops::cmp_gt(result._data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    mask_type operator>=(const Vector& rhs) const
+    {
+        mask_type result;
+        m_ops::cmp_ge(result._data(), registers.data(), rhs.data());
+        return result;
+    }
 };
 
 } // namespace vector_simd
