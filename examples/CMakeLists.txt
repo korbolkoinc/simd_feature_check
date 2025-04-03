@@ -32,6 +32,9 @@ foreach(example_source ${EXAMPLE_SOURCES})
     # This ensures consistent code quality across the project
     target_compile_warnings(${example_name} PRIVATE)
 
+    # Add -march=native compiler flag for architecture-specific optimizations
+    target_compile_options(${example_name} PRIVATE -march=native)
+
     # If sanitizers are enabled in the main build, also enable them for examples
     # This helps catch memory/undefined behavior issues in example code too
     if(ENABLE_SANITIZERS)
