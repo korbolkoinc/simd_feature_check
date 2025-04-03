@@ -1,6 +1,7 @@
 #ifndef SIMD_HPP_al9nn6
 #define SIMD_HPP_al9nn6
 
+#include <array>
 #include <simd/common.hpp>
 #include <simd/feature_check.hpp>
 
@@ -928,7 +929,7 @@ public:
         store(result.data());
         return result;
     }
-    
+
 };
 
 } // namespace vector_simd
