@@ -126,6 +126,196 @@ struct best_available_tag
     >;
 };
 
+using current_isa = typename best_available_tag::type;
+
+template <typename T, typename ISA>
+struct simd_width;
+
+template <>
+struct simd_width<float, sse2_tag>
+{
+    static constexpr size_t value = 4;
+};
+
+template <>
+struct simd_width<double, sse2_tag>
+{
+    static constexpr size_t value = 2;
+};
+
+template <>
+struct simd_width<int8_t, sse2_tag>
+{
+    static constexpr size_t value = 16;
+};
+
+template <>
+struct simd_width<uint8_t, sse2_tag>
+{
+    static constexpr size_t value = 16;
+};
+
+template <>
+struct simd_width<int16_t, sse2_tag>
+{
+    static constexpr size_t value = 8;
+};
+
+template <>
+struct simd_width<uint16_t, sse2_tag>
+{
+    static constexpr size_t value = 8;
+};
+
+template <>
+struct simd_width<int32_t, sse2_tag>
+{
+    static constexpr size_t value = 4;
+};
+
+template <>
+struct simd_width<uint32_t, sse2_tag>
+{
+    static constexpr size_t value = 4;
+};
+
+template <>
+struct simd_width<int64_t, sse2_tag>
+{
+    static constexpr size_t value = 2;
+};
+
+template <>
+struct simd_width<uint64_t, sse2_tag>
+{
+    static constexpr size_t value = 2;
+};
+
+template <>
+struct simd_width<float, avx_tag>
+{
+    static constexpr size_t value = 8;
+};
+
+template <>
+struct simd_width<double, avx_tag>
+{
+    static constexpr size_t value = 4;
+};
+
+template <>
+struct simd_width<int8_t, avx_tag>
+{
+    static constexpr size_t value = 32;
+};
+
+template <>
+struct simd_width<uint8_t, avx_tag>
+{
+    static constexpr size_t value = 32;
+};
+
+template <>
+struct simd_width<int16_t, avx_tag>
+{
+    static constexpr size_t value = 16;
+};
+
+template <>
+struct simd_width<uint16_t, avx_tag>
+{
+    static constexpr size_t value = 16;
+};
+
+template <>
+struct simd_width<int32_t, avx_tag>
+{
+    static constexpr size_t value = 8;
+};
+
+template <>
+struct simd_width<uint32_t, avx_tag>
+{
+    static constexpr size_t value = 8;
+};
+
+template <>
+struct simd_width<int64_t, avx_tag>
+{
+    static constexpr size_t value = 4;
+};
+
+template <>
+struct simd_width<uint64_t, avx_tag>
+{
+    static constexpr size_t value = 4;
+};
+
+template <typename T>
+struct simd_width<T, avx2_tag> : simd_width<T, avx_tag>
+{
+};
+
+template <>
+struct simd_width<float, avx512_tag>
+{
+    static constexpr size_t value = 16;
+};
+
+template <>
+struct simd_width<double, avx512_tag>
+{
+    static constexpr size_t value = 8;
+};
+
+template <>
+struct simd_width<int8_t, avx512_tag>
+{
+    static constexpr size_t value = 64;
+};
+
+template <>
+struct simd_width<uint8_t, avx512_tag>
+{
+    static constexpr size_t value = 64;
+};
+
+template <>
+struct simd_width<int16_t, avx512_tag>
+{
+    static constexpr size_t value = 32;
+};
+
+template <>
+struct simd_width<uint16_t, avx512_tag>
+{
+    static constexpr size_t value = 32;
+};
+
+template <>
+struct simd_width<int32_t, avx512_tag>
+{
+    static constexpr size_t value = 16;
+};
+
+template <>
+struct simd_width<uint32_t, avx512_tag>
+{
+    static constexpr size_t value = 16;
+};
+
+template <>
+struct simd_width<int64_t, avx512_tag>
+{
+    static constexpr size_t value = 8;
+};
+
+template <>
+struct simd_width<uint64_t, avx512_tag>
+{
+    static constexpr size_t value = 8;
+};
+
 } // namespace detail
 
 } // namespace vector_simd
