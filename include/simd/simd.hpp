@@ -995,6 +995,52 @@ public:
         ops::div(registers.data(), registers.data(), rhs.data());
         return *this;
     }
+
+    Vector operator&(const Vector& rhs) const
+    {
+        Vector result;
+        ops::bitwise_and(result.data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    Vector operator|(const Vector& rhs) const
+    {
+        Vector result;
+        ops::bitwise_or(result.data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    Vector operator^(const Vector& rhs) const
+    {
+        Vector result;
+        ops::bitwise_xor(result.data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    Vector operator~() const
+    {
+        Vector result;
+        ops::bitwise_not(result.data(), registers.data());
+        return result;
+    }
+
+    Vector& operator&=(const Vector& rhs)
+    {
+        ops::bitwise_and(registers.data(), registers.data(), rhs.data());
+        return *this;
+    }
+
+    Vector& operator|=(const Vector& rhs)
+    {
+        ops::bitwise_or(registers.data(), registers.data(), rhs.data());
+        return *this;
+    }
+
+    Vector& operator^=(const Vector& rhs)
+    {
+        ops::bitwise_xor(registers.data(), registers.data(), rhs.data());
+        return *this;
+    }
 };
 
 } // namespace vector_simd
