@@ -2161,6 +2161,76 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
     }
 };
 
+template <typename T, size_t N>
+struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2>::compile_time>>
+{
+    using mask_register_t = typename mask_register_type<T, sse2_tag>::type;
+    using register_t = typename register_type<T, sse2_tag>::type;
+    
+    static SIMD_INLINE void set_true(mask_register_t* mask)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *mask = _mm_cmpeq_ps(_mm_setzero_ps(), _mm_setzero_ps());
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *mask = _mm_cmpeq_pd(_mm_setzero_pd(), _mm_setzero_pd());
+        }
+        else
+        {
+            *mask = _mm_cmpeq_epi32(_mm_setzero_si128(), _mm_setzero_si128());
+        }
+    }
+
+    static SIMD_INLINE void set_false(mask_register_t* mask)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *mask = _mm_setzero_ps();
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *mask = _mm_setzero_pd();
+        }
+        else
+        {
+            *mask = _mm_setzero_si128();
+        }
+    }
+
+    static SIMD_INLINE void load(mask_register_t* dst, const bool* src)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            alignas(16) int32_t tmp[4] = {0};
+            for (size_t i = 0; i < 4; ++i)
+            {
+                tmp[i] = src[i] ? -1 : 0;
+            }
+            *dst = _mm_load_ps(reinterpret_cast<const float*>(tmp));
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(16) int64_t tmp[2] = {0};
+            for (size_t i = 0; i < 2; ++i)
+            {
+                tmp[i] = src[i] ? -1 : 0;
+            }
+            *dst = _mm_load_pd(reinterpret_cast<const double*>(tmp));
+        }
+        else
+        {
+            alignas(16) int tmp[16 / sizeof(T)] = {0};
+            for (size_t i = 0; i < 16 / sizeof(T); ++i)
+            {
+                tmp[i] = src[i] ? -1 : 0;
+            }
+            *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(tmp));
+        }
+    }
+};
+
 }
 
 #endif
