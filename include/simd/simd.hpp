@@ -2424,6 +2424,27 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2
             *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(tmp));
         }
     }
+
+    static SIMD_INLINE void cmp_le(mask_register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_cmple_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_cmple_pd(*a, *b);
+        }
+        else
+        {
+            mask_register_t lt, eq;
+            cmp_lt(&lt, a, b);
+            cmp_eq(&eq, a, b);
+            logical_or(dst, &lt, &eq);
+        }
+    }
+
+    
 };
 
 }
