@@ -2229,6 +2229,59 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2
             *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(tmp));
         }
     }
+
+    static SIMD_INLINE void store(const mask_register_t* src, bool* dst)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            alignas(16) float tmp[4];
+            _mm_store_ps(tmp, *src);
+            for (size_t i = 0; i < 4; ++i)
+            {
+                dst[i] = reinterpret_cast<const int32_t*>(tmp)[i] != 0;
+            }
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(16) double tmp[2];
+            _mm_store_pd(tmp, *src);
+            for (size_t i = 0; i < 2; ++i)
+            {
+                dst[i] = reinterpret_cast<const int64_t*>(tmp)[i] != 0;
+            }
+        }
+        else
+        {
+            alignas(16) T tmp[16 / sizeof(T)];
+            _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
+            for (size_t i = 0; i < 16 / sizeof(T); ++i)
+            {
+                dst[i] = tmp[i] != 0;
+            }
+        }
+    }
+
+    static SIMD_INLINE bool extract(const mask_register_t* src, size_t index)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            alignas(16) float tmp[4];
+            _mm_store_ps(tmp, *src);
+            return reinterpret_cast<const int32_t*>(tmp)[index % 4] != 0;
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(16) double tmp[2];
+            _mm_store_pd(tmp, *src);
+            return reinterpret_cast<const int64_t*>(tmp)[index % 2] != 0;
+        }
+        else
+        {
+            alignas(16) T tmp[16 / sizeof(T)];
+            _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
+            return tmp[index % (16 / sizeof(T))] != 0;
+        }
+    }
 };
 
 }
