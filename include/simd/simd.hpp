@@ -1868,6 +1868,73 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
             *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(a_arr));
         }
     }
+
+    static SIMD_INLINE void bitwise_and(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_and_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_and_pd(*a, *b);
+        }
+        else
+        {
+            *dst = _mm_and_si128(*a, *b);
+        }
+    }
+
+    static SIMD_INLINE void bitwise_or(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_or_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_or_pd(*a, *b);
+        }
+        else
+        {
+            *dst = _mm_or_si128(*a, *b);
+        }
+    }
+
+    static SIMD_INLINE void bitwise_xor(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_xor_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_xor_pd(*a, *b);
+        }
+        else
+        {
+            *dst = _mm_xor_si128(*a, *b);
+        }
+    }
+
+    static SIMD_INLINE void bitwise_not(register_t* dst, const register_t* a)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            const __m128 ones = _mm_cmpeq_ps(*a, *a);
+            *dst = _mm_xor_ps(*a, ones);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            const __m128d ones = _mm_cmpeq_pd(*a, *a);
+            *dst = _mm_xor_pd(*a, ones);
+        }
+        else
+        {
+            const __m128i ones = _mm_cmpeq_epi32(*a, *a);
+            *dst = _mm_xor_si128(*a, ones);
+        }
+    }
 };
 
 }
