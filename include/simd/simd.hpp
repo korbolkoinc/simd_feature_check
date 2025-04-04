@@ -2333,6 +2333,97 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2
             *dst = _mm_xor_si128(*a, *b);
         }
     }
+
+    static SIMD_INLINE void logical_not(mask_register_t* dst, const mask_register_t* a)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            __m128 ones = _mm_cmpeq_ps(_mm_setzero_ps(), _mm_setzero_ps());
+            *dst = _mm_xor_ps(*a, ones);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            __m128d ones = _mm_cmpeq_pd(_mm_setzero_pd(), _mm_setzero_pd());
+            *dst = _mm_xor_pd(*a, ones);
+        }
+        else
+        {
+            __m128i ones = _mm_cmpeq_epi32(_mm_setzero_si128(), _mm_setzero_si128());
+            *dst = _mm_xor_si128(*a, ones);
+        }
+    }
+
+    static SIMD_INLINE void cmp_eq(mask_register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_cmpeq_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_cmpeq_pd(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>)
+        {
+            *dst = _mm_cmpeq_epi8(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>)
+        {
+            *dst = _mm_cmpeq_epi16(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t> ||
+                           std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>)
+        {
+            *dst = _mm_cmpeq_epi32(*a, *b);
+        }
+    }
+
+    static SIMD_INLINE void cmp_neq(mask_register_t* dst, const register_t* a, const register_t* b)
+    {
+        cmp_eq(dst, a, b);
+        logical_not(dst, dst);
+    }
+
+    static SIMD_INLINE void cmp_lt(mask_register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_cmplt_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_cmplt_pd(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int8_t>)
+        {
+            *dst = _mm_cmplt_epi8(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int16_t>)
+        {
+            *dst = _mm_cmplt_epi16(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int32_t>)
+        {
+            *dst = _mm_cmplt_epi32(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, uint8_t> || std::is_same_v<T, uint16_t> ||
+                           std::is_same_v<T, uint32_t> || std::is_same_v<T, int64_t> ||
+                           std::is_same_v<T, uint64_t>)
+        {
+            alignas(16) T a_arr[16 / sizeof(T)];
+            alignas(16) T b_arr[16 / sizeof(T)];
+            _mm_store_si128(reinterpret_cast<__m128i*>(a_arr), *a);
+            _mm_store_si128(reinterpret_cast<__m128i*>(b_arr), *b);
+
+            alignas(16) int tmp[16 / sizeof(T)] = {0};
+            for (size_t i = 0; i < 16 / sizeof(T); ++i)
+            {
+                tmp[i] = a_arr[i] < b_arr[i] ? -1 : 0;
+            }
+
+            *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(tmp));
+        }
+    }
 };
 
 }
