@@ -2282,6 +2282,57 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2
             return tmp[index % (16 / sizeof(T))] != 0;
         }
     }
+
+    static SIMD_INLINE void logical_and(mask_register_t* dst, const mask_register_t* a,
+                                        const mask_register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_and_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_and_pd(*a, *b);
+        }
+        else
+        {
+            *dst = _mm_and_si128(*a, *b);
+        }
+    }
+
+    static SIMD_INLINE void logical_or(mask_register_t* dst, const mask_register_t* a,
+                                       const mask_register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_or_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_or_pd(*a, *b);
+        }
+        else
+        {
+            *dst = _mm_or_si128(*a, *b);
+        }
+    }
+
+    static SIMD_INLINE void logical_xor(mask_register_t* dst, const mask_register_t* a,
+                                        const mask_register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_xor_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_xor_pd(*a, *b);
+        }
+        else
+        {
+            *dst = _mm_xor_si128(*a, *b);
+        }
+    }
 };
 
 }
