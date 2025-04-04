@@ -1935,6 +1935,46 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
             *dst = _mm_xor_si128(*a, ones);
         }
     }
+
+    static SIMD_INLINE void blend(register_t* dst, const register_t* a, const register_t* b,
+                                  const typename mask_register_type<T, sse2_tag>::type* mask)
+    {
+#if SIMD_SSE4_1
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_blendv_ps(*a, *b, *mask);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_blendv_pd(*a, *b, *mask);
+        }
+        else
+        {
+            *dst = _mm_blendv_epi8(*a, *b, *mask);
+        }
+#else
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_or_ps(_mm_and_ps(*mask, *b), _mm_andnot_ps(*mask, *a));
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_or_pd(_mm_and_pd(*mask, *b), _mm_andnot_pd(*mask, *a));
+        }
+        else
+        {
+            *dst = _mm_or_si128(_mm_and_si128(*mask, *b), _mm_andnot_si128(*mask, *a));
+        }
+#endif
+    }
+
+    static SIMD_INLINE void select(register_t* dst,
+                                   const typename mask_register_type<T, sse2_tag>::type* mask,
+                                   const register_t* a, const register_t* b)
+    {
+        // !Note: operands reversed because masks are different semantics
+        blend(dst, b, a, mask);
+    }
 };
 
 }
