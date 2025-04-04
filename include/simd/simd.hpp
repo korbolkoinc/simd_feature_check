@@ -1597,8 +1597,75 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
             *dst = _mm_sub_epi64(*a, *b);
         }
     }
+
+    static SIMD_INLINE void mul(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_mul_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_mul_pd(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>)
+        {
+            *dst = _mm_mullo_epi16(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>)
+        {
+#if SIMD_SSE4_1
+            *dst = _mm_mullo_epi32(*a, *b);
+#else
+            __m128i tmp1 = _mm_mul_epu32(*a, *b);
+            __m128i tmp2 = _mm_mul_epu32(_mm_srli_si128(*a, 4), _mm_srli_si128(*b, 4));
+            *dst = _mm_unpacklo_epi32(_mm_shuffle_epi32(tmp1, _MM_SHUFFLE(0, 0, 2, 0)),
+                                      _mm_shuffle_epi32(tmp2, _MM_SHUFFLE(0, 0, 2, 0)));
+#endif
+        }
+        else
+        {
+            alignas(16) T a_arr[16 / sizeof(T)];
+            alignas(16) T b_arr[16 / sizeof(T)];
+            _mm_store_si128(reinterpret_cast<__m128i*>(a_arr), *a);
+            _mm_store_si128(reinterpret_cast<__m128i*>(b_arr), *b);
+
+            for (size_t i = 0; i < 16 / sizeof(T); ++i)
+            {
+                a_arr[i] *= b_arr[i];
+            }
+
+            *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(a_arr));
+        }
+    }
+
+    static SIMD_INLINE void div(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_div_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_div_pd(*a, *b);
+        }
+        else
+        {
+            alignas(16) T a_arr[16 / sizeof(T)];
+            alignas(16) T b_arr[16 / sizeof(T)];
+            _mm_store_si128(reinterpret_cast<__m128i*>(a_arr), *a);
+            _mm_store_si128(reinterpret_cast<__m128i*>(b_arr), *b);
+
+            for (size_t i = 0; i < 16 / sizeof(T); ++i)
+            {
+                a_arr[i] /= b_arr[i];
+            }
+
+            *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(a_arr));
+        }
+    }
     
-    
+
 };
 
 }
