@@ -2597,6 +2597,11 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2
 
 };
 
+template <typename T, size_t N>
+struct memory_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2>::compile_time>>
+{
+};
+
 }
 
 #endif
