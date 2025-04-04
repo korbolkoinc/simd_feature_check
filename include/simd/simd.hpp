@@ -2,6 +2,7 @@
 #define SIMD_HPP_al9nn6
 
 #include <array>
+#include <bit>
 #include <simd/common.hpp>
 #include <simd/feature_check.hpp>
 
@@ -2444,7 +2445,156 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2
         }
     }
 
-    
+    static SIMD_INLINE void cmp_gt(mask_register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_cmpgt_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_cmpgt_pd(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int8_t>)
+        {
+            *dst = _mm_cmpgt_epi8(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int16_t>)
+        {
+            *dst = _mm_cmpgt_epi16(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int32_t>)
+        {
+            *dst = _mm_cmpgt_epi32(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, uint8_t> || std::is_same_v<T, uint16_t> ||
+                           std::is_same_v<T, uint32_t> || std::is_same_v<T, int64_t> ||
+                           std::is_same_v<T, uint64_t>)
+        {
+            alignas(16) T a_arr[16 / sizeof(T)];
+            alignas(16) T b_arr[16 / sizeof(T)];
+            _mm_store_si128(reinterpret_cast<__m128i*>(a_arr), *a);
+            _mm_store_si128(reinterpret_cast<__m128i*>(b_arr), *b);
+
+            alignas(16) int tmp[16 / sizeof(T)] = {0};
+            for (size_t i = 0; i < 16 / sizeof(T); ++i)
+            {
+                tmp[i] = a_arr[i] > b_arr[i] ? -1 : 0;
+            }
+
+            *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(tmp));
+        }
+    }
+
+    static SIMD_INLINE void cmp_ge(mask_register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_cmpge_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_cmpge_pd(*a, *b);
+        }
+        else
+        {
+            mask_register_t gt, eq;
+            cmp_gt(&gt, a, b);
+            cmp_eq(&eq, a, b);
+            logical_or(dst, &gt, &eq);
+        }
+    }
+
+    static SIMD_INLINE uint64_t to_bitmask(const mask_register_t* mask)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            return _mm_movemask_ps(*mask);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            return _mm_movemask_pd(*mask);
+        }
+        else
+        {
+            return _mm_movemask_epi8(*mask);
+        }
+    }
+
+    static SIMD_INLINE bool any(const mask_register_t* mask) { return to_bitmask(mask) != 0; }
+
+    static SIMD_INLINE bool all(const mask_register_t* mask)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            return to_bitmask(mask) == 0xF;
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            return to_bitmask(mask) == 0x3;
+        }
+        else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>)
+        {
+            return to_bitmask(mask) == 0xFFFF;
+        }
+        else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>)
+        {
+            constexpr int shift = sizeof(T) / sizeof(int8_t);
+            constexpr uint64_t mask_bits = (1ULL << (16 / shift)) - 1;
+            constexpr uint64_t full_mask = shift == 1   ? 0xFFFF
+                                           : shift == 2 ? 0x5555
+                                           : shift == 4 ? 0x1111
+                                           : shift == 8 ? 0x0101
+                                                        : 0;
+            return (to_bitmask(mask) & full_mask) == full_mask;
+        }
+        else
+        {
+            constexpr int shift = sizeof(T) / sizeof(int8_t);
+            constexpr uint64_t mask_bits = (1ULL << (16 / shift)) - 1;
+            constexpr uint64_t full_mask = shift == 1   ? 0xFFFF
+                                           : shift == 2 ? 0x5555
+                                           : shift == 4 ? 0x1111
+                                           : shift == 8 ? 0x0101
+                                                        : 0;
+            return (to_bitmask(mask) & full_mask) == full_mask;
+        }
+    }
+
+    static SIMD_INLINE int count(const mask_register_t* mask)
+    {
+        uint64_t bits = to_bitmask(mask);
+        if constexpr (std::is_same_v<T, float>)
+        {
+            return std::popcount(bits & 0xF);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            return std::popcount(bits & 0x3);
+        }
+        else
+        {
+            constexpr int shift = sizeof(T) / sizeof(int8_t);
+            if constexpr (shift == 1)
+            {
+                return std::popcount(bits & 0xFFFF);
+            }
+            else
+            {
+                int count = 0;
+                constexpr int elements = 16 / sizeof(T);
+                for (int i = 0; i < elements; ++i)
+                {
+                    if (bits & (1ULL << (i * shift)))
+                    {
+                        count++;
+                    }
+                }
+                return count;
+            }
+        }
+    }
+
 };
 
 }
