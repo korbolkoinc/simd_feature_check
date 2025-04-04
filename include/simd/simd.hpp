@@ -1665,7 +1665,107 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
         }
     }
     
+    static SIMD_INLINE void min(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_min_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_min_pd(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int8_t>)
+        {
+#if SIMD_SSE4_1
+            *dst = _mm_min_epi8(*a, *b);
+#else
+            alignas(16) int8_t a_arr[16], b_arr[16];
+            _mm_store_si128(reinterpret_cast<__m128i*>(a_arr), *a);
+            _mm_store_si128(reinterpret_cast<__m128i*>(b_arr), *b);
 
+            for (int i = 0; i < 16; ++i)
+            {
+                a_arr[i] = std::min(a_arr[i], b_arr[i]);
+            }
+
+            *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(a_arr));
+#endif
+        }
+        else if constexpr (std::is_same_v<T, uint8_t>)
+        {
+            *dst = _mm_min_epu8(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int16_t>)
+        {
+            *dst = _mm_min_epi16(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, uint16_t>)
+        {
+#if SIMD_SSE4_1
+            *dst = _mm_min_epu16(*a, *b);
+#else
+            alignas(16) uint16_t a_arr[8], b_arr[8];
+            _mm_store_si128(reinterpret_cast<__m128i*>(a_arr), *a);
+            _mm_store_si128(reinterpret_cast<__m128i*>(b_arr), *b);
+
+            for (int i = 0; i < 8; ++i)
+            {
+                a_arr[i] = std::min(a_arr[i], b_arr[i]);
+            }
+
+            *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(a_arr));
+#endif
+        }
+        else if constexpr (std::is_same_v<T, int32_t>)
+        {
+#if SIMD_SSE4_1
+            *dst = _mm_min_epi32(*a, *b);
+#else
+            alignas(16) int32_t a_arr[4], b_arr[4];
+            _mm_store_si128(reinterpret_cast<__m128i*>(a_arr), *a);
+            _mm_store_si128(reinterpret_cast<__m128i*>(b_arr), *b);
+
+            for (int i = 0; i < 4; ++i)
+            {
+                a_arr[i] = std::min(a_arr[i], b_arr[i]);
+            }
+
+            *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(a_arr));
+#endif
+        }
+        else if constexpr (std::is_same_v<T, uint32_t>)
+        {
+#if SIMD_SSE4_1
+            *dst = _mm_min_epu32(*a, *b);
+#else
+            alignas(16) uint32_t a_arr[4], b_arr[4];
+            _mm_store_si128(reinterpret_cast<__m128i*>(a_arr), *a);
+            _mm_store_si128(reinterpret_cast<__m128i*>(b_arr), *b);
+
+            for (int i = 0; i < 4; ++i)
+            {
+                a_arr[i] = std::min(a_arr[i], b_arr[i]);
+            }
+
+            *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(a_arr));
+#endif
+        }
+        else
+        {
+            alignas(16) T a_arr[16 / sizeof(T)];
+            alignas(16) T b_arr[16 / sizeof(T)];
+            _mm_store_si128(reinterpret_cast<__m128i*>(a_arr), *a);
+            _mm_store_si128(reinterpret_cast<__m128i*>(b_arr), *b);
+
+            for (size_t i = 0; i < 16 / sizeof(T); ++i)
+            {
+                a_arr[i] = std::min(a_arr[i], b_arr[i]);
+            }
+
+            *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(a_arr));
+        }
+    }
 };
 
 }
