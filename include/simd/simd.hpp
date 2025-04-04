@@ -2003,6 +2003,162 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
             return sum;
         }
     }
+
+    static SIMD_INLINE T horizontal_min(const register_t* src)
+    {
+        alignas(16) T tmp[16 / sizeof(T)];
+        if constexpr (std::is_same_v<T, float>)
+        {
+            _mm_store_ps(tmp, *src);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            _mm_store_pd(tmp, *src);
+        }
+        else
+        {
+            _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
+        }
+
+        T min_val = tmp[0];
+        for (size_t i = 1; i < 16 / sizeof(T); ++i)
+        {
+            min_val = std::min(min_val, tmp[i]);
+        }
+        return min_val;
+    }
+
+    static SIMD_INLINE T horizontal_max(const register_t* src)
+    {
+        alignas(16) T tmp[16 / sizeof(T)];
+        if constexpr (std::is_same_v<T, float>)
+        {
+            _mm_store_ps(tmp, *src);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            _mm_store_pd(tmp, *src);
+        }
+        else
+        {
+            _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
+        }
+
+        T max_val = tmp[0];
+        for (size_t i = 1; i < 16 / sizeof(T); ++i)
+        {
+            max_val = std::max(max_val, tmp[i]);
+        }
+        return max_val;
+    }
+
+    static SIMD_INLINE void shuffle(register_t* dst, const register_t* src, const int* indices)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            alignas(16) float tmp[4];
+            _mm_store_ps(tmp, *src);
+
+            alignas(16) float result[4];
+            for (size_t i = 0; i < 4; ++i)
+            {
+                result[i] = tmp[indices[i] % 4];
+            }
+
+            *dst = _mm_load_ps(result);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(16) double tmp[2];
+            _mm_store_pd(tmp, *src);
+
+            alignas(16) double result[2];
+            for (size_t i = 0; i < 2; ++i)
+            {
+                result[i] = tmp[indices[i] % 2];
+            }
+
+            *dst = _mm_load_pd(result);
+        }
+        else
+        {
+            alignas(16) T tmp[16 / sizeof(T)];
+            _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
+
+            alignas(16) T result[16 / sizeof(T)];
+            for (size_t i = 0; i < 16 / sizeof(T); ++i)
+            {
+                result[i] = tmp[indices[i] % (16 / sizeof(T))];
+            }
+
+            *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(result));
+        }
+    }
+
+    template <typename U>
+    static SIMD_INLINE void convert(typename register_type<U, sse2_tag>::type* dst,
+                                    const register_t* src)
+    {
+        if constexpr (std::is_same_v<T, float> && std::is_same_v<U, int32_t>)
+        {
+            *dst = _mm_cvtps_epi32(*src);
+        }
+        else if constexpr (std::is_same_v<T, int32_t> && std::is_same_v<U, float>)
+        {
+            *dst = _mm_cvtepi32_ps(*src);
+        }
+        else if constexpr (std::is_same_v<T, float> && std::is_same_v<U, double>)
+        {
+            __m128 s = *src;
+            __m128d lo = _mm_cvtps_pd(s);
+            __m128d hi = _mm_cvtps_pd(_mm_movehl_ps(s, s));
+            // dst should be an array of two __m128d registers
+            dst[0] = lo;
+            dst[1] = hi;
+        }
+        else if constexpr (std::is_same_v<T, double> && std::is_same_v<U, float>)
+        {
+            __m128 lo = _mm_cvtpd_ps(src[0]);
+            __m128 hi = _mm_cvtpd_ps(src[1]);
+            *dst = _mm_movelh_ps(lo, hi);
+        }
+        else
+        {
+            // Generic conversion for other types
+            alignas(16) T src_arr[16 / sizeof(T)];
+            if constexpr (std::is_same_v<T, float>)
+            {
+                _mm_store_ps(src_arr, *src);
+            }
+            else if constexpr (std::is_same_v<T, double>)
+            {
+                _mm_store_pd(src_arr, *src);
+            }
+            else
+            {
+                _mm_store_si128(reinterpret_cast<__m128i*>(src_arr), *src);
+            }
+
+            alignas(16) U dst_arr[16 / sizeof(U)];
+            for (size_t i = 0; i < std::min(16 / sizeof(T), 16 / sizeof(U)); ++i)
+            {
+                dst_arr[i] = static_cast<U>(src_arr[i]);
+            }
+
+            if constexpr (std::is_same_v<U, float>)
+            {
+                *dst = _mm_load_ps(dst_arr);
+            }
+            else if constexpr (std::is_same_v<U, double>)
+            {
+                *dst = _mm_load_pd(dst_arr);
+            }
+            else
+            {
+                *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(dst_arr));
+            }
+        }
+    }
 };
 
 }
