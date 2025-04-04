@@ -1975,6 +1975,34 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
         // !Note: operands reversed because masks are different semantics
         blend(dst, b, a, mask);
     }
+
+    static SIMD_INLINE T horizontal_sum(const register_t* src)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            __m128 sum = *src;
+            sum = _mm_add_ps(sum, _mm_movehl_ps(sum, sum));
+            sum = _mm_add_ss(sum, _mm_shuffle_ps(sum, sum, 1));
+            return _mm_cvtss_f32(sum);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            __m128d sum = *src;
+            sum = _mm_add_sd(sum, _mm_unpackhi_pd(sum, sum));
+            return _mm_cvtsd_f64(sum);
+        }
+        else
+        {
+            alignas(16) T tmp[16 / sizeof(T)];
+            _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
+            T sum = 0;
+            for (size_t i = 0; i < 16 / sizeof(T); ++i)
+            {
+                sum += tmp[i];
+            }
+            return sum;
+        }
+    }
 };
 
 }
