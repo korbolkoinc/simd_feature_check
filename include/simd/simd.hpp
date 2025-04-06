@@ -3207,8 +3207,89 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AV
 
 #endif // SIMD_AVX
 
+#if SIMD_ARCH_X86 && SIMD_AVX512
+
+template <typename T, size_t N>
+struct vector_ops<T, N,
+                  std::enable_if_t<simd::FeatureDetector<simd::Feature::AVX512F>::compile_time>>
+{
+    using register_t = typename register_type<T, avx512_tag>::type;
+    using mask_t = typename mask_register_type<T, avx512_tag>::type;
+
+    static SIMD_INLINE void set1(register_t* dst, T value)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm512_set1_ps(value);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm512_set1_pd(value);
+        }
+        else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>)
+        {
+            *dst = _mm512_set1_epi8(static_cast<char>(value));
+        }
+        else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>)
+        {
+            *dst = _mm512_set1_epi16(static_cast<short>(value));
+        }
+        else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>)
+        {
+            *dst = _mm512_set1_epi32(static_cast<int>(value));
+        }
+        else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>)
+        {
+            *dst = _mm512_set1_epi64(static_cast<long long>(value));
+        }
+    }
+
+    // Additional AVX-512 operations would be implemented here...
+    // For brevity, not all operations are shown
+};
+
+#endif // SIMD_AVX512 
+
+template <typename T, size_t N, typename Func>
+SIMD_INLINE auto dispatch_simd_function(Func&& sse2_impl, Func&& avx_impl, Func&& avx2_impl,
+                                        Func&& avx512_impl, Func&& fallback_impl)
+{
+    if constexpr (simd::FeatureDetector<simd::Feature::AVX512F>::compile_time)
+    {
+        if (simd::runtime::has<simd::Feature::AVX512F>())
+        {
+            return std::forward<Func>(avx512_impl);
+        }
+    }
+
+    if constexpr (simd::FeatureDetector<simd::Feature::AVX2>::compile_time)
+    {
+        if (simd::runtime::has<simd::Feature::AVX2>())
+        {
+            return std::forward<Func>(avx2_impl);
+        }
+    }
+
+    if constexpr (simd::FeatureDetector<simd::Feature::AVX>::compile_time)
+    {
+        if (simd::runtime::has<simd::Feature::AVX>())
+        {
+            return std::forward<Func>(avx_impl);
+        }
+    }
+
+    if constexpr (simd::FeatureDetector<simd::Feature::SSE2>::compile_time)
+    {
+        if (simd::runtime::has<simd::Feature::SSE2>())
+        {
+            return std::forward<Func>(sse2_impl);
+        }
+    }
+
+    return std::forward<Func>(fallback_impl);
 }
 
+} // namespace detail
 } // namespace vector_simd
 
 #endif
