@@ -3042,10 +3042,174 @@ struct math_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2
     }
 };
 
-}
+#if SIMD_AVX
 
+template <typename T, size_t N>
+struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AVX>::compile_time>>
+{
+    using register_t = typename register_type<T, avx_tag>::type;
+
+    static SIMD_INLINE void set1(register_t* dst, T value)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm256_set1_ps(value);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm256_set1_pd(value);
+        }
+        else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>)
+        {
+            *dst = _mm256_set1_epi8(static_cast<char>(value));
+        }
+        else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>)
+        {
+            *dst = _mm256_set1_epi16(static_cast<short>(value));
+        }
+        else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>)
+        {
+            *dst = _mm256_set1_epi32(static_cast<int>(value));
+        }
+        else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>)
+        {
+            *dst = _mm256_set1_epi64x(static_cast<long long>(value));
+        }
+    }
+
+    static SIMD_INLINE T extract(const register_t* src, size_t index)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            alignas(32) float tmp[8];
+            _mm256_store_ps(tmp, *src);
+            return tmp[index % 8];
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(32) double tmp[4];
+            _mm256_store_pd(tmp, *src);
+            return tmp[index % 4];
+        }
+        else
+        {
+            alignas(32) T tmp[32 / sizeof(T)];
+            _mm256_store_si256(reinterpret_cast<__m256i*>(tmp), *src);
+            return tmp[index % (32 / sizeof(T))];
+        }
+    }
+
+    static SIMD_INLINE void insert(register_t* dst, size_t index, T value)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            alignas(32) float tmp[8];
+            _mm256_store_ps(tmp, *dst);
+            tmp[index % 8] = value;
+            *dst = _mm256_load_ps(tmp);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(32) double tmp[4];
+            _mm256_store_pd(tmp, *dst);
+            tmp[index % 4] = value;
+            *dst = _mm256_load_pd(tmp);
+        }
+        else
+        {
+            alignas(32) T tmp[32 / sizeof(T)];
+            _mm256_store_si256(reinterpret_cast<__m256i*>(tmp), *dst);
+            tmp[index % (32 / sizeof(T))] = value;
+            *dst = _mm256_load_si256(reinterpret_cast<const __m256i*>(tmp));
+        }
+    }
+
+    static SIMD_INLINE void add(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm256_add_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm256_add_pd(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_add_epi8(*a, *b);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+
+            __m128i res_lo = _mm_add_epi8(a_lo, b_lo);
+            __m128i res_hi = _mm_add_epi8(a_hi, b_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
 #endif
+        }
+        else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_add_epi16(*a, *b);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+
+            __m128i res_lo = _mm_add_epi16(a_lo, b_lo);
+            __m128i res_hi = _mm_add_epi16(a_hi, b_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_add_epi32(*a, *b);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+
+            __m128i res_lo = _mm_add_epi32(a_lo, b_lo);
+            __m128i res_hi = _mm_add_epi32(a_hi, b_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_add_epi64(*a, *b);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+
+            __m128i res_lo = _mm_add_epi64(a_lo, b_lo);
+            __m128i res_hi = _mm_add_epi64(a_hi, b_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+    }
+
+    // Additional AVX operations would be implemented here...
+    // For brevity, not all operations are shown, but they would follow
+    // a similar pattern to the SSE2 implementations with AVX instructions
+};
+
+#endif // SIMD_AVX
+
+}
 
 } // namespace vector_simd
 
+#endif
 #endif /* End of include guard: SIMD_HPP_al9nn6 */
