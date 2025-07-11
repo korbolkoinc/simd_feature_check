@@ -115,15 +115,7 @@ struct best_available_tag
                             std::conditional_t<
                                 simd::compile_time::has<simd::Feature::SSE3>(), sse3_tag,
                                 std::conditional_t<simd::compile_time::has<simd::Feature::SSE2>(),
-                                                   sse2_tag, generic_tag
-                                >
-                            >
-                        >
-                    >
-                >
-            >
-        >
-    >;
+                                                   sse2_tag, generic_tag>>>>>>>>;
 };
 
 using current_isa = typename best_available_tag::type;
@@ -1154,7 +1146,7 @@ public:
     }
 
     T hsum() const { return ops::horizontal_sum(registers.data()); }
-    
+
     T hmin() const { return ops::horizontal_min(registers.data()); }
 
     T hmax() const { return ops::horizontal_max(registers.data()); }
@@ -1666,7 +1658,7 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
             *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(a_arr));
         }
     }
-    
+
     static SIMD_INLINE void min(register_t* dst, const register_t* a, const register_t* b)
     {
         if constexpr (std::is_same_v<T, float>)
@@ -2168,7 +2160,7 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2
 {
     using mask_register_t = typename mask_register_type<T, sse2_tag>::type;
     using register_t = typename register_type<T, sse2_tag>::type;
-    
+
     static SIMD_INLINE void set_true(mask_register_t* mask)
     {
         if constexpr (std::is_same_v<T, float>)
@@ -2595,7 +2587,6 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2
             }
         }
     }
-
 };
 
 template <typename T, size_t N>
@@ -2603,10 +2594,7 @@ struct memory_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
 {
     using register_t = typename register_type<T, sse2_tag>::type;
 
-    static SIMD_INLINE void load(register_t* dst, const T* src)
-    {
-        load_unaligned(dst, src);
-    }
+    static SIMD_INLINE void load(register_t* dst, const T* src) { load_unaligned(dst, src); }
 
     static SIMD_INLINE void load_aligned(register_t* dst, const T* src)
     {
@@ -2640,10 +2628,7 @@ struct memory_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
         }
     }
 
-    static SIMD_INLINE void store(const register_t* src, T* dst)
-    {
-        store_unaligned(src, dst);
-    }
+    static SIMD_INLINE void store(const register_t* src, T* dst) { store_unaligned(src, dst); }
 
     static SIMD_INLINE void store_aligned(const register_t* src, T* dst)
     {
@@ -3200,11 +3185,28 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AV
         }
     }
 
-    // Additional AVX operations would be implemented here...
-    // For brevity, not all operations are shown, but they would follow
-    // a similar pattern to the SSE2 implementations with AVX instructions
+    static SIMD_INLINE T extract(const register_t* src, size_t index)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            alignas(32) float tmp[8];
+            _mm256_store_ps(tmp, *src);
+            return tmp[index % 8];
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(32) double tmp[4];
+            _mm256_store_pd(tmp, *src);
+            return tmp[index % 4];
+        }
+        else
+        {
+            alignas(32) T tmp[32 / sizeof(T)];
+            _mm256_store_si256(reinterpret_cast<__m256i*>(tmp), *src);
+            return tmp[index % (32 / sizeof(T))];
+        }
+    }
 };
-
 #endif // SIMD_AVX
 
 #if SIMD_ARCH_X86 && SIMD_AVX512
@@ -3248,7 +3250,7 @@ struct vector_ops<T, N,
     // For brevity, not all operations are shown
 };
 
-#endif // SIMD_AVX512 
+#endif // SIMD_AVX512
 
 template <typename T, size_t N, typename Func>
 SIMD_INLINE auto dispatch_simd_function(Func&& sse2_impl, Func&& avx_impl, Func&& avx2_impl,
