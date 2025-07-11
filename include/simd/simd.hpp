@@ -3206,6 +3206,31 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AV
             return tmp[index % (32 / sizeof(T))];
         }
     }
+
+    static SIMD_INLINE void insert(register_t* dst, size_t index, T value)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            alignas(32) float tmp[8];
+            _mm256_store_ps(tmp, *dst);
+            tmp[index % 8] = value;
+            *dst = _mm256_load_ps(tmp);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(32) double tmp[4];
+            _mm256_store_pd(tmp, *dst);
+            tmp[index % 4] = value;
+            *dst = _mm256_load_pd(tmp);
+        }
+        else
+        {
+            alignas(32) T tmp[32 / sizeof(T)];
+            _mm256_store_si256(reinterpret_cast<__m256i*>(tmp), *dst);
+            tmp[index % (32 / sizeof(T))] = value;
+            *dst = _mm256_load_si256(reinterpret_cast<const __m256i*>(tmp));
+        }
+    }
 };
 #endif // SIMD_AVX
 
