@@ -6,18 +6,10 @@
 #include <cmath>
 #include <simd/common.hpp>
 #include <simd/feature_check.hpp>
+#include <simd/core/types.hpp>
 
 namespace vector_simd
 {
-
-constexpr int kVersionMajor = 0;
-constexpr int kVersionMinor = 1;
-constexpr int kVersionPatch = 0;
-
-constexpr size_t kSSEAlignment = 16;
-constexpr size_t kAVXAlignment = 32;
-constexpr size_t kAVX512Alignment = 64;
-
 constexpr size_t kDefaultAlignment =
     simd::compile_time::has<simd::Feature::AVX512F>() ? kAVX512Alignment
     : simd::compile_time::has<simd::Feature::AVX>()   ? kAVXAlignment
