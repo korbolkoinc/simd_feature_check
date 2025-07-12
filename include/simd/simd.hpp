@@ -10,6 +10,7 @@
 #include <simd/core/concepts.hpp>
 #include <simd/core/types.hpp>
 #include <simd/feature_check.hpp>
+#include <simd/operations/forward_decl.hpp>
 #include <simd/registers/types.hpp>
 
 namespace vector_simd
@@ -24,20 +25,6 @@ class Mask;
 
 namespace detail
 {
-    
-// forward declarations for vector and mask operations
-
-template <typename T, size_t N, typename ISA = current_isa>
-struct vector_ops;
-
-template <typename T, size_t N, typename ISA = current_isa>
-struct mask_ops;
-
-template <typename T, size_t N, typename ISA = current_isa>
-struct memory_ops;
-
-template <typename T, size_t N, typename ISA = current_isa>
-struct math_ops;
 
 template <typename Derived, typename T, size_t N>
 class vector_base
