@@ -3872,6 +3872,116 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AV
         }
         return max_val;
     }
+
+    static SIMD_INLINE void shuffle(register_t* dst, const register_t* src, const int* indices)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            alignas(32) float tmp[8];
+            _mm256_store_ps(tmp, *src);
+
+            alignas(32) float result[8];
+            for (size_t i = 0; i < 8; ++i)
+            {
+                result[i] = tmp[indices[i] % 8];
+            }
+
+            *dst = _mm256_load_ps(result);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(32) double tmp[4];
+            _mm256_store_pd(tmp, *src);
+
+            alignas(32) double result[4];
+            for (size_t i = 0; i < 4; ++i)
+            {
+                result[i] = tmp[indices[i] % 4];
+            }
+
+            *dst = _mm256_load_pd(result);
+        }
+        else
+        {
+            alignas(32) T tmp[32 / sizeof(T)];
+            _mm256_store_si256(reinterpret_cast<__m256i*>(tmp), *src);
+
+            alignas(32) T result[32 / sizeof(T)];
+            for (size_t i = 0; i < 32 / sizeof(T); ++i)
+            {
+                result[i] = tmp[indices[i] % (32 / sizeof(T))];
+            }
+
+            *dst = _mm256_load_si256(reinterpret_cast<const __m256i*>(result));
+        }
+    }
+
+    template <typename U>
+    static SIMD_INLINE void convert(typename register_type<U, avx_tag>::type* dst,
+                                    const register_t* src)
+    {
+        if constexpr (std::is_same_v<T, float> && std::is_same_v<U, int32_t>)
+        {
+            *dst = _mm256_cvtps_epi32(*src);
+        }
+        else if constexpr (std::is_same_v<T, int32_t> && std::is_same_v<U, float>)
+        {
+            *dst = _mm256_cvtepi32_ps(*src);
+        }
+        else if constexpr (std::is_same_v<T, float> && std::is_same_v<U, double>)
+        {
+            __m256 s = *src;
+            __m128 s_lo = _mm256_extractf128_ps(s, 0);
+            __m128 s_hi = _mm256_extractf128_ps(s, 1);
+            *dst = _mm256_insertf128_pd(_mm256_castpd128_pd256(_mm_cvtps_pd(s_lo)),
+                                        _mm_cvtps_pd(s_hi), 1);
+        }
+        else if constexpr (std::is_same_v<T, double> && std::is_same_v<U, float>)
+        {
+            __m256d s = *src;
+            __m128d s_lo = _mm256_extractf128_pd(s, 0);
+            __m128d s_hi = _mm256_extractf128_pd(s, 1);
+            __m128 lo = _mm_cvtpd_ps(s_lo);
+            __m128 hi = _mm_cvtpd_ps(s_hi);
+            *dst = _mm256_insertf128_ps(_mm256_castps128_ps256(lo), hi, 1);
+        }
+        else
+        {
+            // generic conversion for other types
+            alignas(32) T src_arr[32 / sizeof(T)];
+            if constexpr (std::is_same_v<T, float>)
+            {
+                _mm256_store_ps(src_arr, *src);
+            }
+            else if constexpr (std::is_same_v<T, double>)
+            {
+                _mm256_store_pd(src_arr, *src);
+            }
+            else
+            {
+                _mm256_store_si256(reinterpret_cast<__m256i*>(src_arr), *src);
+            }
+
+            alignas(32) U dst_arr[32 / sizeof(U)];
+            for (size_t i = 0; i < std::min(32 / sizeof(T), 32 / sizeof(U)); ++i)
+            {
+                dst_arr[i] = static_cast<U>(src_arr[i]);
+            }
+
+            if constexpr (std::is_same_v<U, float>)
+            {
+                *dst = _mm256_load_ps(dst_arr);
+            }
+            else if constexpr (std::is_same_v<U, double>)
+            {
+                *dst = _mm256_load_pd(dst_arr);
+            }
+            else
+            {
+                *dst = _mm256_load_si256(reinterpret_cast<const __m256i*>(dst_arr));
+            }
+        }
+    }
 };
 #endif // SIMD_AVX
 
