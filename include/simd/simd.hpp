@@ -4107,6 +4107,31 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AV
             *dst = _mm256_load_pd(tmp);
         }
     }
+
+    static SIMD_INLINE void fmadd(register_t* dst, const register_t* a, const register_t* b,
+                                  const register_t* c)
+    {
+#if SIMD_FMA
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm256_fmadd_ps(*a, *b, *c);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm256_fmadd_pd(*a, *b, *c);
+        }
+        else
+        {
+            register_t tmp;
+            mul(&tmp, a, b);
+            add(dst, &tmp, c);
+        }
+#else
+        register_t tmp;
+        mul(&tmp, a, b);
+        add(dst, &tmp, c);
+#endif
+    }
 };
 #endif // SIMD_AVX
 
