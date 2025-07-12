@@ -4234,6 +4234,37 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AVX>
             *dst = _mm256_load_si256(reinterpret_cast<const __m256i*>(tmp));
         }
     }
+
+    static SIMD_INLINE void store(const mask_register_t* src, bool* dst)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            alignas(32) float tmp[8];
+            _mm256_store_ps(tmp, *src);
+            for (size_t i = 0; i < 8; ++i)
+            {
+                dst[i] = reinterpret_cast<const int32_t*>(tmp)[i] != 0;
+            }
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(32) double tmp[4];
+            _mm256_store_pd(tmp, *src);
+            for (size_t i = 0; i < 4; ++i)
+            {
+                dst[i] = reinterpret_cast<const int64_t*>(tmp)[i] != 0;
+            }
+        }
+        else
+        {
+            alignas(32) T tmp[32 / sizeof(T)];
+            _mm256_store_si256(reinterpret_cast<__m256i*>(tmp), *src);
+            for (size_t i = 0; i < 32 / sizeof(T); ++i)
+            {
+                dst[i] = tmp[i] != 0;
+            }
+        }
+    }
 };
 
 #endif // SIMD_AVX
