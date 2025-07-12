@@ -4187,6 +4187,22 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AVX>
 #endif
         }
     }
+
+    static SIMD_INLINE void set_false(mask_register_t* mask)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *mask = _mm256_setzero_ps();
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *mask = _mm256_setzero_pd();
+        }
+        else
+        {
+            *mask = _mm256_setzero_si256();
+        }
+    }
 };
 
 #endif // SIMD_AVX
