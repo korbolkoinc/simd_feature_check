@@ -4345,6 +4345,38 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AVX>
 #endif
         }
     }
+
+    static SIMD_INLINE void logical_not(mask_register_t* dst, const mask_register_t* a)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            __m256 ones = _mm256_cmp_ps(_mm256_setzero_ps(), _mm256_setzero_ps(), _CMP_EQ_OQ);
+            *dst = _mm256_xor_ps(*a, ones);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            __m256d ones = _mm256_cmp_pd(_mm256_setzero_pd(), _mm256_setzero_pd(), _CMP_EQ_OQ);
+            *dst = _mm256_xor_pd(*a, ones);
+        }
+        else
+        {
+#if SIMD_AVX2
+            __m256i ones = _mm256_cmpeq_epi32(_mm256_setzero_si256(), _mm256_setzero_si256());
+            *dst = _mm256_xor_si256(*a, ones);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+
+            __m128i ones_lo = _mm_cmpeq_epi32(_mm_setzero_si128(), _mm_setzero_si128());
+            __m128i ones_hi = _mm_cmpeq_epi32(_mm_setzero_si128(), _mm_setzero_si128());
+
+            __m128i res_lo = _mm_xor_si128(a_lo, ones_lo);
+            __m128i res_hi = _mm_xor_si128(a_hi, ones_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+    }
 };
 
 #endif // SIMD_AVX
