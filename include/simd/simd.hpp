@@ -4265,6 +4265,28 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AVX>
             }
         }
     }
+
+    static SIMD_INLINE bool extract(const mask_register_t* src, size_t index)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            alignas(32) float tmp[8];
+            _mm256_store_ps(tmp, *src);
+            return reinterpret_cast<const int32_t*>(tmp)[index % 8] != 0;
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(32) double tmp[4];
+            _mm256_store_pd(tmp, *src);
+            return reinterpret_cast<const int64_t*>(tmp)[index % 4] != 0;
+        }
+        else
+        {
+            alignas(32) T tmp[32 / sizeof(T)];
+            _mm256_store_si256(reinterpret_cast<__m256i*>(tmp), *src);
+            return tmp[index % (32 / sizeof(T))] != 0;
+        }
+    }
 };
 
 #endif // SIMD_AVX
