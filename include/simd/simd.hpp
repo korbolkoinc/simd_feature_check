@@ -4082,6 +4082,31 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AV
             *dst = _mm256_load_pd(tmp);
         }
     }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    static SIMD_INLINE void log(register_t* dst, const register_t* src)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            alignas(32) float tmp[8];
+            _mm256_store_ps(tmp, *src);
+            for (int i = 0; i < 8; ++i)
+            {
+                tmp[i] = std::log(tmp[i]);
+            }
+            *dst = _mm256_load_ps(tmp);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(32) double tmp[4];
+            _mm256_store_pd(tmp, *src);
+            for (int i = 0; i < 4; ++i)
+            {
+                tmp[i] = std::log(tmp[i]);
+            }
+            *dst = _mm256_load_pd(tmp);
+        }
+    }
 };
 #endif // SIMD_AVX
 
