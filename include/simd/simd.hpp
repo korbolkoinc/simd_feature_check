@@ -4,6 +4,7 @@
 #include <array>
 #include <bit>
 #include <cmath>
+#include <simd/arch/detection.hpp>
 #include <simd/arch/tags.hpp>
 #include <simd/common.hpp>
 #include <simd/core/concepts.hpp>
@@ -13,10 +14,6 @@
 
 namespace vector_simd
 {
-constexpr size_t kDefaultAlignment =
-    simd::compile_time::has<simd::Feature::AVX512F>() ? kAVX512Alignment
-    : simd::compile_time::has<simd::Feature::AVX>()   ? kAVXAlignment
-                                                      : kSSEAlignment;
 
 // Forward declarations
 template <SimdArithmetic T, size_t N>
@@ -27,9 +24,6 @@ class Mask;
 
 namespace detail
 {
-
-
-
 
 template <typename T, typename ISA>
 struct simd_width;
