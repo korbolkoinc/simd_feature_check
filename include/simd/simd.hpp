@@ -4377,6 +4377,177 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AVX>
 #endif
         }
     }
+
+    static SIMD_INLINE void cmp_eq(mask_register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm256_cmp_ps(*a, *b, _CMP_EQ_OQ);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm256_cmp_pd(*a, *b, _CMP_EQ_OQ);
+        }
+        else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_cmpeq_epi8(*a, *b);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+
+            __m128i res_lo = _mm_cmpeq_epi8(a_lo, b_lo);
+            __m128i res_hi = _mm_cmpeq_epi8(a_hi, b_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_cmpeq_epi16(*a, *b);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+
+            __m128i res_lo = _mm_cmpeq_epi16(a_lo, b_lo);
+            __m128i res_hi = _mm_cmpeq_epi16(a_hi, b_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t> ||
+                           std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_cmpeq_epi32(*a, *b);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+
+            __m128i res_lo = _mm_cmpeq_epi32(a_lo, b_lo);
+            __m128i res_hi = _mm_cmpeq_epi32(a_hi, b_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+    }
+
+    static SIMD_INLINE void cmp_neq(mask_register_t* dst, const register_t* a, const register_t* b)
+    {
+        cmp_eq(dst, a, b);
+        logical_not(dst, dst);
+    }
+
+    static SIMD_INLINE void cmp_lt(mask_register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm256_cmp_ps(*a, *b, _CMP_LT_OQ);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm256_cmp_pd(*a, *b, _CMP_LT_OQ);
+        }
+        else if constexpr (std::is_same_v<T, int8_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_cmpgt_epi8(*b, *a);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+
+            __m128i res_lo = _mm_cmplt_epi8(a_lo, b_lo);
+            __m128i res_hi = _mm_cmplt_epi8(a_hi, b_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, int16_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_cmpgt_epi16(*b, *a);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+
+            __m128i res_lo = _mm_cmplt_epi16(a_lo, b_lo);
+            __m128i res_hi = _mm_cmplt_epi16(a_hi, b_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, int32_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_cmpgt_epi32(*b, *a);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+
+            __m128i res_lo = _mm_cmplt_epi32(a_lo, b_lo);
+            __m128i res_hi = _mm_cmplt_epi32(a_hi, b_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+        else
+        {
+            alignas(32) T a_arr[32 / sizeof(T)];
+            alignas(32) T b_arr[32 / sizeof(T)];
+            _mm256_store_si256(reinterpret_cast<__m256i*>(a_arr), *a);
+            _mm256_store_si256(reinterpret_cast<__m256i*>(b_arr), *b);
+
+            alignas(32) T result[32 / sizeof(T)];
+            for (size_t i = 0; i < 32 / sizeof(T); ++i)
+            {
+                result[i] = (a_arr[i] < b_arr[i]) ? ~T(0) : T(0);
+            }
+
+            *dst = _mm256_load_si256(reinterpret_cast<const __m256i*>(result));
+        }
+    }
+
+    static SIMD_INLINE void cmp_le(mask_register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm256_cmp_ps(*a, *b, _CMP_LE_OQ);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm256_cmp_pd(*a, *b, _CMP_LE_OQ);
+        }
+        else
+        {
+            cmp_lt(dst, a, b);
+            mask_register_t eq_mask;
+            cmp_eq(&eq_mask, a, b);
+            logical_or(dst, dst, &eq_mask);
+        }
+    }
+
+    static SIMD_INLINE void cmp_gt(mask_register_t* dst, const register_t* a, const register_t* b)
+    {
+        cmp_lt(dst, b, a);
+    }
+
+    static SIMD_INLINE void cmp_ge(mask_register_t* dst, const register_t* a, const register_t* b)
+    {
+        cmp_le(dst, b, a);
+    }
 };
 
 #endif // SIMD_AVX
