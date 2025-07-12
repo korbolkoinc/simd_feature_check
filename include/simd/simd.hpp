@@ -3307,6 +3307,64 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AV
 #endif
         }
     }
+
+    static SIMD_INLINE void mul(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm256_mul_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm256_mul_pd(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_mullo_epi16(*a, *b);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+
+            __m128i res_lo = _mm_mullo_epi16(a_lo, b_lo);
+            __m128i res_hi = _mm_mullo_epi16(a_hi, b_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_mullo_epi32(*a, *b);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+
+            __m128i res_lo = _mm_mullo_epi32(a_lo, b_lo);
+            __m128i res_hi = _mm_mullo_epi32(a_hi, b_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+        else
+        {
+            alignas(32) T a_arr[32 / sizeof(T)];
+            alignas(32) T b_arr[32 / sizeof(T)];
+            _mm256_store_si256(reinterpret_cast<__m256i*>(a_arr), *a);
+            _mm256_store_si256(reinterpret_cast<__m256i*>(b_arr), *b);
+
+            for (size_t i = 0; i < 32 / sizeof(T); ++i)
+            {
+                a_arr[i] *= b_arr[i];
+            }
+
+            *dst = _mm256_load_si256(reinterpret_cast<const __m256i*>(a_arr));
+        }
+    }
 };
 #endif // SIMD_AVX
 
