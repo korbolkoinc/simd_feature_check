@@ -3751,6 +3751,127 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AV
 #endif
         }
     }
+
+    static SIMD_INLINE void blend(register_t* dst, const register_t* a, const register_t* b,
+                                  const typename mask_register_type<T, avx_tag>::type* mask)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm256_blendv_ps(*a, *b, *mask);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm256_blendv_pd(*a, *b, *mask);
+        }
+        else
+        {
+#if SIMD_AVX2
+            *dst = _mm256_blendv_epi8(*a, *b, *mask);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+            __m128i mask_lo = _mm256_extractf128_si256(*mask, 0);
+            __m128i mask_hi = _mm256_extractf128_si256(*mask, 1);
+
+            __m128i res_lo = _mm_blendv_epi8(a_lo, b_lo, mask_lo);
+            __m128i res_hi = _mm_blendv_epi8(a_hi, b_hi, mask_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+    }
+
+    static SIMD_INLINE void select(register_t* dst,
+                                   const typename mask_register_type<T, avx_tag>::type* mask,
+                                   const register_t* a, const register_t* b)
+    {
+        // !Note: operands reversed because masks are different semantics
+        blend(dst, b, a, mask);
+    }
+
+    static SIMD_INLINE T horizontal_sum(const register_t* src)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            __m256 sum = *src;
+            __m128 sum_lo = _mm256_extractf128_ps(sum, 0);
+            __m128 sum_hi = _mm256_extractf128_ps(sum, 1);
+            sum_lo = _mm_add_ps(sum_lo, sum_hi);
+            sum_lo = _mm_add_ps(sum_lo, _mm_movehl_ps(sum_lo, sum_lo));
+            sum_lo = _mm_add_ss(sum_lo, _mm_shuffle_ps(sum_lo, sum_lo, 1));
+            return _mm_cvtss_f32(sum_lo);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            __m256d sum = *src;
+            __m128d sum_lo = _mm256_extractf128_pd(sum, 0);
+            __m128d sum_hi = _mm256_extractf128_pd(sum, 1);
+            sum_lo = _mm_add_pd(sum_lo, sum_hi);
+            sum_lo = _mm_add_sd(sum_lo, _mm_unpackhi_pd(sum_lo, sum_lo));
+            return _mm_cvtsd_f64(sum_lo);
+        }
+        else
+        {
+            alignas(32) T tmp[32 / sizeof(T)];
+            _mm256_store_si256(reinterpret_cast<__m256i*>(tmp), *src);
+            T sum = 0;
+            for (size_t i = 0; i < 32 / sizeof(T); ++i)
+            {
+                sum += tmp[i];
+            }
+            return sum;
+        }
+    }
+
+    static SIMD_INLINE T horizontal_min(const register_t* src)
+    {
+        alignas(32) T tmp[32 / sizeof(T)];
+        if constexpr (std::is_same_v<T, float>)
+        {
+            _mm256_store_ps(tmp, *src);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            _mm256_store_pd(tmp, *src);
+        }
+        else
+        {
+            _mm256_store_si256(reinterpret_cast<__m256i*>(tmp), *src);
+        }
+
+        T min_val = tmp[0];
+        for (size_t i = 1; i < 32 / sizeof(T); ++i)
+        {
+            min_val = std::min(min_val, tmp[i]);
+        }
+        return min_val;
+    }
+
+    static SIMD_INLINE T horizontal_max(const register_t* src)
+    {
+        alignas(32) T tmp[32 / sizeof(T)];
+        if constexpr (std::is_same_v<T, float>)
+        {
+            _mm256_store_ps(tmp, *src);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            _mm256_store_pd(tmp, *src);
+        }
+        else
+        {
+            _mm256_store_si256(reinterpret_cast<__m256i*>(tmp), *src);
+        }
+
+        T max_val = tmp[0];
+        for (size_t i = 1; i < 32 / sizeof(T); ++i)
+        {
+            max_val = std::max(max_val, tmp[i]);
+        }
+        return max_val;
+    }
 };
 #endif // SIMD_AVX
 
