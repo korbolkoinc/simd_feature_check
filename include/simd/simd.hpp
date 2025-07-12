@@ -3663,6 +3663,94 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AV
 #endif
         }
     }
+
+    static SIMD_INLINE void bitwise_or(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm256_or_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm256_or_pd(*a, *b);
+        }
+        else
+        {
+#if SIMD_AVX2
+            *dst = _mm256_or_si256(*a, *b);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+
+            __m128i res_lo = _mm_or_si128(a_lo, b_lo);
+            __m128i res_hi = _mm_or_si128(a_hi, b_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+    }
+
+    static SIMD_INLINE void bitwise_xor(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm256_xor_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm256_xor_pd(*a, *b);
+        }
+        else
+        {
+#if SIMD_AVX2
+            *dst = _mm256_xor_si256(*a, *b);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+            __m128i b_lo = _mm256_extractf128_si256(*b, 0);
+            __m128i b_hi = _mm256_extractf128_si256(*b, 1);
+
+            __m128i res_lo = _mm_xor_si128(a_lo, b_lo);
+            __m128i res_hi = _mm_xor_si128(a_hi, b_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+    }
+
+    static SIMD_INLINE void bitwise_not(register_t* dst, const register_t* a)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            const __m256 ones = _mm256_cmp_ps(*a, *a, _CMP_EQ_OQ);
+            *dst = _mm256_xor_ps(*a, ones);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            const __m256d ones = _mm256_cmp_pd(*a, *a, _CMP_EQ_OQ);
+            *dst = _mm256_xor_pd(*a, ones);
+        }
+        else
+        {
+#if SIMD_AVX2
+            const __m256i ones = _mm256_cmpeq_epi32(*a, *a);
+            *dst = _mm256_xor_si256(*a, ones);
+#else
+            __m128i a_lo = _mm256_extractf128_si256(*a, 0);
+            __m128i a_hi = _mm256_extractf128_si256(*a, 1);
+
+            const __m128i ones_lo = _mm_cmpeq_epi32(a_lo, a_lo);
+            const __m128i ones_hi = _mm_cmpeq_epi32(a_hi, a_hi);
+
+            __m128i res_lo = _mm_xor_si128(a_lo, ones_lo);
+            __m128i res_hi = _mm_xor_si128(a_hi, ones_hi);
+
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(res_lo), res_hi, 1);
+#endif
+        }
+    }
 };
 #endif // SIMD_AVX
 
