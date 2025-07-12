@@ -4158,6 +4158,37 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AV
 #endif
     }
 };
+
+template <typename T, size_t N>
+struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AVX>::compile_time>>
+{
+    using mask_register_t = typename mask_register_type<T, avx_tag>::type;
+    using register_t = typename register_type<T, avx_tag>::type;
+
+    static SIMD_INLINE void set_true(mask_register_t* mask)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *mask = _mm256_cmp_ps(_mm256_setzero_ps(), _mm256_setzero_ps(), _CMP_EQ_OQ);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *mask = _mm256_cmp_pd(_mm256_setzero_pd(), _mm256_setzero_pd(), _CMP_EQ_OQ);
+        }
+        else
+        {
+#if SIMD_AVX2
+            *mask = _mm256_cmpeq_epi32(_mm256_setzero_si256(), _mm256_setzero_si256());
+#else
+            __m128i zero = _mm_setzero_si128();
+            __m128i ones_lo = _mm_cmpeq_epi32(zero, zero);
+            __m128i ones_hi = _mm_cmpeq_epi32(zero, zero);
+            *mask = _mm256_insertf128_si256(_mm256_castsi128_si256(ones_lo), ones_hi, 1);
+#endif
+        }
+    }
+};
+
 #endif // SIMD_AVX
 
 #if SIMD_ARCH_X86 && SIMD_AVX512
