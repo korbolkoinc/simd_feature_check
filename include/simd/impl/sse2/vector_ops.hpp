@@ -79,217 +79,172 @@ static SIMD_INLINE __m128i insert_epi64_helper(__m128i dst, long long value)
     return _mm_insert_epi64(dst, value, I);
 }
 
+template <typename T, size_t MaxIndex>
+struct runtime_dispatcher_sse
+{
+    template <template <size_t> class HelperFunc, typename RetType, typename... Args>
+    static SIMD_INLINE RetType extract_dispatch(size_t index, Args&&... args)
+    {
+        return extract_dispatch_impl<HelperFunc, RetType, 0>(index, std::forward<Args>(args)...);
+    }
+
+    template <template <size_t> class HelperFunc, typename RetType, typename... Args>
+    static SIMD_INLINE RetType insert_dispatch(size_t index, Args&&... args)
+    {
+        return insert_dispatch_impl<HelperFunc, RetType, 0>(index, std::forward<Args>(args)...);
+    }
+
+private:
+    template <template <size_t> class HelperFunc, typename RetType, size_t Index, typename... Args>
+    static SIMD_INLINE RetType extract_dispatch_impl(size_t runtime_index, Args&&... args)
+    {
+        if constexpr (Index < MaxIndex)
+        {
+            if (runtime_index == Index)
+                return HelperFunc<Index>::call(std::forward<Args>(args)...);
+            else
+                return extract_dispatch_impl<HelperFunc, RetType, Index + 1>(
+                    runtime_index, std::forward<Args>(args)...);
+        }
+        else
+        {
+            return RetType{}; // Default value
+        }
+    }
+
+    template <template <size_t> class HelperFunc, typename RetType, size_t Index, typename... Args>
+    static SIMD_INLINE RetType insert_dispatch_impl(size_t runtime_index, Args&&... args)
+    {
+        if constexpr (Index < MaxIndex)
+        {
+            if (runtime_index == Index)
+                return HelperFunc<Index>::call(std::forward<Args>(args)...);
+            else
+                return insert_dispatch_impl<HelperFunc, RetType, Index + 1>(
+                    runtime_index, std::forward<Args>(args)...);
+        }
+        else
+        {
+            return std::get<0>(std::forward_as_tuple(args...));
+        }
+    }
+};
+
+template <size_t I>
+struct extract_epi8_wrapper_sse
+{
+    static SIMD_INLINE int8_t call(const __m128i& src) { return extract_epi8_helper<I>(src); }
+};
+
+template <size_t I>
+struct extract_epu8_wrapper_sse
+{
+    static SIMD_INLINE uint8_t call(const __m128i& src) { return extract_epu8_helper<I>(src); }
+};
+
+template <size_t I>
+struct extract_epi32_wrapper_sse
+{
+    static SIMD_INLINE int32_t call(const __m128i& src) { return extract_epi32_helper<I>(src); }
+};
+
+template <size_t I>
+struct extract_epu32_wrapper_sse
+{
+    static SIMD_INLINE uint32_t call(const __m128i& src) { return extract_epu32_helper<I>(src); }
+};
+
+template <size_t I>
+struct extract_epi64_wrapper_sse
+{
+    static SIMD_INLINE int64_t call(const __m128i& src) { return extract_epi64_helper<I>(src); }
+};
+
+template <size_t I>
+struct extract_epu64_wrapper_sse
+{
+    static SIMD_INLINE uint64_t call(const __m128i& src) { return extract_epu64_helper<I>(src); }
+};
+
+template <size_t I>
+struct insert_epi8_wrapper_sse
+{
+    static SIMD_INLINE __m128i call(__m128i dst, int value)
+    {
+        return insert_epi8_helper<I>(dst, value);
+    }
+};
+
+template <size_t I>
+struct insert_epi32_wrapper_sse
+{
+    static SIMD_INLINE __m128i call(__m128i dst, int value)
+    {
+        return insert_epi32_helper<I>(dst, value);
+    }
+};
+
+template <size_t I>
+struct insert_epi64_wrapper_sse
+{
+    static SIMD_INLINE __m128i call(__m128i dst, long long value)
+    {
+        return insert_epi64_helper<I>(dst, value);
+    }
+};
+
 static SIMD_INLINE int8_t extract_epi8_runtime(const __m128i& src, size_t index)
 {
-    switch (index % 16)
-    {
-        case 0:
-            return extract_epi8_helper<0>(src);
-        case 1:
-            return extract_epi8_helper<1>(src);
-        case 2:
-            return extract_epi8_helper<2>(src);
-        case 3:
-            return extract_epi8_helper<3>(src);
-        case 4:
-            return extract_epi8_helper<4>(src);
-        case 5:
-            return extract_epi8_helper<5>(src);
-        case 6:
-            return extract_epi8_helper<6>(src);
-        case 7:
-            return extract_epi8_helper<7>(src);
-        case 8:
-            return extract_epi8_helper<8>(src);
-        case 9:
-            return extract_epi8_helper<9>(src);
-        case 10:
-            return extract_epi8_helper<10>(src);
-        case 11:
-            return extract_epi8_helper<11>(src);
-        case 12:
-            return extract_epi8_helper<12>(src);
-        case 13:
-            return extract_epi8_helper<13>(src);
-        case 14:
-            return extract_epi8_helper<14>(src);
-        case 15:
-            return extract_epi8_helper<15>(src);
-        default:
-            return 0;
-    }
+    return runtime_dispatcher_sse<int8_t, 16>::extract_dispatch<extract_epi8_wrapper_sse, int8_t>(
+        index % 16, src);
 }
 
 static SIMD_INLINE uint8_t extract_epu8_runtime(const __m128i& src, size_t index)
 {
-    switch (index % 16)
-    {
-        case 0:
-            return extract_epu8_helper<0>(src);
-        case 1:
-            return extract_epu8_helper<1>(src);
-        case 2:
-            return extract_epu8_helper<2>(src);
-        case 3:
-            return extract_epu8_helper<3>(src);
-        case 4:
-            return extract_epu8_helper<4>(src);
-        case 5:
-            return extract_epu8_helper<5>(src);
-        case 6:
-            return extract_epu8_helper<6>(src);
-        case 7:
-            return extract_epu8_helper<7>(src);
-        case 8:
-            return extract_epu8_helper<8>(src);
-        case 9:
-            return extract_epu8_helper<9>(src);
-        case 10:
-            return extract_epu8_helper<10>(src);
-        case 11:
-            return extract_epu8_helper<11>(src);
-        case 12:
-            return extract_epu8_helper<12>(src);
-        case 13:
-            return extract_epu8_helper<13>(src);
-        case 14:
-            return extract_epu8_helper<14>(src);
-        case 15:
-            return extract_epu8_helper<15>(src);
-        default:
-            return 0;
-    }
+    return runtime_dispatcher_sse<uint8_t, 16>::extract_dispatch<extract_epu8_wrapper_sse, uint8_t>(
+        index % 16, src);
 }
 
 static SIMD_INLINE int32_t extract_epi32_runtime(const __m128i& src, size_t index)
 {
-    switch (index % 4)
-    {
-        case 0:
-            return extract_epi32_helper<0>(src);
-        case 1:
-            return extract_epi32_helper<1>(src);
-        case 2:
-            return extract_epi32_helper<2>(src);
-        case 3:
-            return extract_epi32_helper<3>(src);
-        default:
-            return 0;
-    }
+    return runtime_dispatcher_sse<int32_t, 4>::extract_dispatch<extract_epi32_wrapper_sse, int32_t>(
+        index % 4, src);
 }
 
 static SIMD_INLINE uint32_t extract_epu32_runtime(const __m128i& src, size_t index)
 {
-    switch (index % 4)
-    {
-        case 0:
-            return extract_epu32_helper<0>(src);
-        case 1:
-            return extract_epu32_helper<1>(src);
-        case 2:
-            return extract_epu32_helper<2>(src);
-        case 3:
-            return extract_epu32_helper<3>(src);
-        default:
-            return 0;
-    }
+    return runtime_dispatcher_sse<uint32_t, 4>::extract_dispatch<extract_epu32_wrapper_sse,
+                                                                 uint32_t>(index % 4, src);
 }
 
 static SIMD_INLINE int64_t extract_epi64_runtime(const __m128i& src, size_t index)
 {
-    switch (index % 2)
-    {
-        case 0:
-            return extract_epi64_helper<0>(src);
-        case 1:
-            return extract_epi64_helper<1>(src);
-        default:
-            return 0;
-    }
+    return runtime_dispatcher_sse<int64_t, 2>::extract_dispatch<extract_epi64_wrapper_sse, int64_t>(
+        index % 2, src);
 }
 
 static SIMD_INLINE uint64_t extract_epu64_runtime(const __m128i& src, size_t index)
 {
-    switch (index % 2)
-    {
-        case 0:
-            return extract_epu64_helper<0>(src);
-        case 1:
-            return extract_epu64_helper<1>(src);
-        default:
-            return 0;
-    }
+    return runtime_dispatcher_sse<uint64_t, 2>::extract_dispatch<extract_epu64_wrapper_sse,
+                                                                 uint64_t>(index % 2, src);
 }
 
 static SIMD_INLINE __m128i insert_epi8_runtime(__m128i dst, size_t index, int value)
 {
-    switch (index % 16)
-    {
-        case 0:
-            return insert_epi8_helper<0>(dst, value);
-        case 1:
-            return insert_epi8_helper<1>(dst, value);
-        case 2:
-            return insert_epi8_helper<2>(dst, value);
-        case 3:
-            return insert_epi8_helper<3>(dst, value);
-        case 4:
-            return insert_epi8_helper<4>(dst, value);
-        case 5:
-            return insert_epi8_helper<5>(dst, value);
-        case 6:
-            return insert_epi8_helper<6>(dst, value);
-        case 7:
-            return insert_epi8_helper<7>(dst, value);
-        case 8:
-            return insert_epi8_helper<8>(dst, value);
-        case 9:
-            return insert_epi8_helper<9>(dst, value);
-        case 10:
-            return insert_epi8_helper<10>(dst, value);
-        case 11:
-            return insert_epi8_helper<11>(dst, value);
-        case 12:
-            return insert_epi8_helper<12>(dst, value);
-        case 13:
-            return insert_epi8_helper<13>(dst, value);
-        case 14:
-            return insert_epi8_helper<14>(dst, value);
-        case 15:
-            return insert_epi8_helper<15>(dst, value);
-        default:
-            return dst;
-    }
+    return runtime_dispatcher_sse<__m128i, 16>::insert_dispatch<insert_epi8_wrapper_sse, __m128i>(
+        index % 16, dst, value);
 }
 
 static SIMD_INLINE __m128i insert_epi32_runtime(__m128i dst, size_t index, int value)
 {
-    switch (index % 4)
-    {
-        case 0:
-            return insert_epi32_helper<0>(dst, value);
-        case 1:
-            return insert_epi32_helper<1>(dst, value);
-        case 2:
-            return insert_epi32_helper<2>(dst, value);
-        case 3:
-            return insert_epi32_helper<3>(dst, value);
-        default:
-            return dst;
-    }
+    return runtime_dispatcher_sse<__m128i, 4>::insert_dispatch<insert_epi32_wrapper_sse, __m128i>(
+        index % 4, dst, value);
 }
 
 static SIMD_INLINE __m128i insert_epi64_runtime(__m128i dst, size_t index, long long value)
 {
-    switch (index % 2)
-    {
-        case 0:
-            return insert_epi64_helper<0>(dst, value);
-        case 1:
-            return insert_epi64_helper<1>(dst, value);
-        default:
-            return dst;
-    }
+    return runtime_dispatcher_sse<__m128i, 2>::insert_dispatch<insert_epi64_wrapper_sse, __m128i>(
+        index % 2, dst, value);
 }
 #endif // SIMD_SSE4_1
 
@@ -1056,7 +1011,7 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
             __m128 s = *src;
             __m128d lo = _mm_cvtps_pd(s);
             __m128d hi = _mm_cvtps_pd(_mm_movehl_ps(s, s));
-            // dst should be an array of two __m128d registers
+
             dst[0] = lo;
             dst[1] = hi;
         }
@@ -1068,7 +1023,6 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
         }
         else
         {
-            // Generic conversion for other types
             alignas(16) T src_arr[16 / sizeof(T)];
             if constexpr (std::is_same_v<T, float>)
             {

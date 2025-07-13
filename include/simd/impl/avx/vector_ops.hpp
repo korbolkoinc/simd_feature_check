@@ -154,7 +154,6 @@ static SIMD_INLINE __m256i insert_epi64_helper_avx(__m256i dst, long long value)
     }
 }
 
-// Template metaprogramming approach for runtime dispatch
 template <typename T, size_t MaxIndex>
 struct runtime_dispatcher
 {
@@ -203,13 +202,11 @@ private:
         }
         else
         {
-            // Return first argument (dst) for insert operations
             return std::get<0>(std::forward_as_tuple(args...));
         }
     }
 };
 
-// Helper wrappers for extract operations
 template <size_t I>
 struct extract_epi8_wrapper_avx
 {
@@ -252,7 +249,6 @@ struct extract_epu64_wrapper_avx
     }
 };
 
-// Helper wrappers for insert operations
 template <size_t I>
 struct insert_epi8_wrapper_avx
 {
@@ -280,7 +276,6 @@ struct insert_epi64_wrapper_avx
     }
 };
 
-// Clean runtime functions using template dispatch
 static SIMD_INLINE int8_t extract_epi8_runtime_avx(const __m256i& src, size_t index)
 {
     return runtime_dispatcher<int8_t, 32>::extract_dispatch<extract_epi8_wrapper_avx, int8_t>(
