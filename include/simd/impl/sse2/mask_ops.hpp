@@ -391,7 +391,6 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2
         else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>)
         {
             constexpr int shift = sizeof(T) / sizeof(int8_t);
-            constexpr uint64_t mask_bits = (1ULL << (16 / shift)) - 1;
             constexpr uint64_t full_mask = shift == 1   ? 0xFFFF
                                            : shift == 2 ? 0x5555
                                            : shift == 4 ? 0x1111
@@ -402,7 +401,6 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2
         else
         {
             constexpr int shift = sizeof(T) / sizeof(int8_t);
-            constexpr uint64_t mask_bits = (1ULL << (16 / shift)) - 1;
             constexpr uint64_t full_mask = shift == 1   ? 0xFFFF
                                            : shift == 2 ? 0x5555
                                            : shift == 4 ? 0x1111

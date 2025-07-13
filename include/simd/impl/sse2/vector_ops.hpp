@@ -1,9 +1,9 @@
 #ifndef LIB_SIMD_IMPL_SSE2_VECTOR_OPS_HPP_9b0cmo
 #define LIB_SIMD_IMPL_SSE2_VECTOR_OPS_HPP_9b0cmo
 
-#include "simd/arch/detection.hpp"
 #include "simd/operations/forward_decl.hpp"
 #include "simd/registers/types.hpp"
+#include <simd/feature_check.hpp>
 
 #if SIMD_ARCH_X86 && SIMD_HAS_SSE2
 #include <algorithm>
