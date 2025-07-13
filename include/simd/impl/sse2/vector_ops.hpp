@@ -10,12 +10,288 @@
 #include <emmintrin.h>
 #include <type_traits>
 
-// TODO: fix constant problem on_mm_extract_epi32
-
 namespace vector_simd
 {
 namespace detail
 {
+
+#if SIMD_SSE4_1
+template <size_t I>
+static SIMD_INLINE int8_t extract_epi8_helper(const __m128i& src)
+{
+    static_assert(I < 16, "Index out of range for epi8 extraction");
+    return static_cast<int8_t>(_mm_extract_epi8(src, I));
+}
+
+template <size_t I>
+static SIMD_INLINE uint8_t extract_epu8_helper(const __m128i& src)
+{
+    static_assert(I < 16, "Index out of range for epu8 extraction");
+    return static_cast<uint8_t>(_mm_extract_epi8(src, I));
+}
+
+template <size_t I>
+static SIMD_INLINE int32_t extract_epi32_helper(const __m128i& src)
+{
+    static_assert(I < 4, "Index out of range for epi32 extraction");
+    return static_cast<int32_t>(_mm_extract_epi32(src, I));
+}
+
+template <size_t I>
+static SIMD_INLINE uint32_t extract_epu32_helper(const __m128i& src)
+{
+    static_assert(I < 4, "Index out of range for epu32 extraction");
+    return static_cast<uint32_t>(_mm_extract_epi32(src, I));
+}
+
+template <size_t I>
+static SIMD_INLINE int64_t extract_epi64_helper(const __m128i& src)
+{
+    static_assert(I < 2, "Index out of range for epi64 extraction");
+    return static_cast<int64_t>(_mm_extract_epi64(src, I));
+}
+
+template <size_t I>
+static SIMD_INLINE uint64_t extract_epu64_helper(const __m128i& src)
+{
+    static_assert(I < 2, "Index out of range for epu64 extraction");
+    return static_cast<uint64_t>(_mm_extract_epi64(src, I));
+}
+
+template <size_t I>
+static SIMD_INLINE __m128i insert_epi8_helper(__m128i dst, int value)
+{
+    static_assert(I < 16, "Index out of range for epi8 insertion");
+    return _mm_insert_epi8(dst, value, I);
+}
+
+template <size_t I>
+static SIMD_INLINE __m128i insert_epi32_helper(__m128i dst, int value)
+{
+    static_assert(I < 4, "Index out of range for epi32 insertion");
+    return _mm_insert_epi32(dst, value, I);
+}
+
+template <size_t I>
+static SIMD_INLINE __m128i insert_epi64_helper(__m128i dst, long long value)
+{
+    static_assert(I < 2, "Index out of range for epi64 insertion");
+    return _mm_insert_epi64(dst, value, I);
+}
+
+static SIMD_INLINE int8_t extract_epi8_runtime(const __m128i& src, size_t index)
+{
+    switch (index % 16)
+    {
+        case 0:
+            return extract_epi8_helper<0>(src);
+        case 1:
+            return extract_epi8_helper<1>(src);
+        case 2:
+            return extract_epi8_helper<2>(src);
+        case 3:
+            return extract_epi8_helper<3>(src);
+        case 4:
+            return extract_epi8_helper<4>(src);
+        case 5:
+            return extract_epi8_helper<5>(src);
+        case 6:
+            return extract_epi8_helper<6>(src);
+        case 7:
+            return extract_epi8_helper<7>(src);
+        case 8:
+            return extract_epi8_helper<8>(src);
+        case 9:
+            return extract_epi8_helper<9>(src);
+        case 10:
+            return extract_epi8_helper<10>(src);
+        case 11:
+            return extract_epi8_helper<11>(src);
+        case 12:
+            return extract_epi8_helper<12>(src);
+        case 13:
+            return extract_epi8_helper<13>(src);
+        case 14:
+            return extract_epi8_helper<14>(src);
+        case 15:
+            return extract_epi8_helper<15>(src);
+        default:
+            return 0;
+    }
+}
+
+static SIMD_INLINE uint8_t extract_epu8_runtime(const __m128i& src, size_t index)
+{
+    switch (index % 16)
+    {
+        case 0:
+            return extract_epu8_helper<0>(src);
+        case 1:
+            return extract_epu8_helper<1>(src);
+        case 2:
+            return extract_epu8_helper<2>(src);
+        case 3:
+            return extract_epu8_helper<3>(src);
+        case 4:
+            return extract_epu8_helper<4>(src);
+        case 5:
+            return extract_epu8_helper<5>(src);
+        case 6:
+            return extract_epu8_helper<6>(src);
+        case 7:
+            return extract_epu8_helper<7>(src);
+        case 8:
+            return extract_epu8_helper<8>(src);
+        case 9:
+            return extract_epu8_helper<9>(src);
+        case 10:
+            return extract_epu8_helper<10>(src);
+        case 11:
+            return extract_epu8_helper<11>(src);
+        case 12:
+            return extract_epu8_helper<12>(src);
+        case 13:
+            return extract_epu8_helper<13>(src);
+        case 14:
+            return extract_epu8_helper<14>(src);
+        case 15:
+            return extract_epu8_helper<15>(src);
+        default:
+            return 0;
+    }
+}
+
+static SIMD_INLINE int32_t extract_epi32_runtime(const __m128i& src, size_t index)
+{
+    switch (index % 4)
+    {
+        case 0:
+            return extract_epi32_helper<0>(src);
+        case 1:
+            return extract_epi32_helper<1>(src);
+        case 2:
+            return extract_epi32_helper<2>(src);
+        case 3:
+            return extract_epi32_helper<3>(src);
+        default:
+            return 0;
+    }
+}
+
+static SIMD_INLINE uint32_t extract_epu32_runtime(const __m128i& src, size_t index)
+{
+    switch (index % 4)
+    {
+        case 0:
+            return extract_epu32_helper<0>(src);
+        case 1:
+            return extract_epu32_helper<1>(src);
+        case 2:
+            return extract_epu32_helper<2>(src);
+        case 3:
+            return extract_epu32_helper<3>(src);
+        default:
+            return 0;
+    }
+}
+
+static SIMD_INLINE int64_t extract_epi64_runtime(const __m128i& src, size_t index)
+{
+    switch (index % 2)
+    {
+        case 0:
+            return extract_epi64_helper<0>(src);
+        case 1:
+            return extract_epi64_helper<1>(src);
+        default:
+            return 0;
+    }
+}
+
+static SIMD_INLINE uint64_t extract_epu64_runtime(const __m128i& src, size_t index)
+{
+    switch (index % 2)
+    {
+        case 0:
+            return extract_epu64_helper<0>(src);
+        case 1:
+            return extract_epu64_helper<1>(src);
+        default:
+            return 0;
+    }
+}
+
+static SIMD_INLINE __m128i insert_epi8_runtime(__m128i dst, size_t index, int value)
+{
+    switch (index % 16)
+    {
+        case 0:
+            return insert_epi8_helper<0>(dst, value);
+        case 1:
+            return insert_epi8_helper<1>(dst, value);
+        case 2:
+            return insert_epi8_helper<2>(dst, value);
+        case 3:
+            return insert_epi8_helper<3>(dst, value);
+        case 4:
+            return insert_epi8_helper<4>(dst, value);
+        case 5:
+            return insert_epi8_helper<5>(dst, value);
+        case 6:
+            return insert_epi8_helper<6>(dst, value);
+        case 7:
+            return insert_epi8_helper<7>(dst, value);
+        case 8:
+            return insert_epi8_helper<8>(dst, value);
+        case 9:
+            return insert_epi8_helper<9>(dst, value);
+        case 10:
+            return insert_epi8_helper<10>(dst, value);
+        case 11:
+            return insert_epi8_helper<11>(dst, value);
+        case 12:
+            return insert_epi8_helper<12>(dst, value);
+        case 13:
+            return insert_epi8_helper<13>(dst, value);
+        case 14:
+            return insert_epi8_helper<14>(dst, value);
+        case 15:
+            return insert_epi8_helper<15>(dst, value);
+        default:
+            return dst;
+    }
+}
+
+static SIMD_INLINE __m128i insert_epi32_runtime(__m128i dst, size_t index, int value)
+{
+    switch (index % 4)
+    {
+        case 0:
+            return insert_epi32_helper<0>(dst, value);
+        case 1:
+            return insert_epi32_helper<1>(dst, value);
+        case 2:
+            return insert_epi32_helper<2>(dst, value);
+        case 3:
+            return insert_epi32_helper<3>(dst, value);
+        default:
+            return dst;
+    }
+}
+
+static SIMD_INLINE __m128i insert_epi64_runtime(__m128i dst, size_t index, long long value)
+{
+    switch (index % 2)
+    {
+        case 0:
+            return insert_epi64_helper<0>(dst, value);
+        case 1:
+            return insert_epi64_helper<1>(dst, value);
+        default:
+            return dst;
+    }
+}
+#endif // SIMD_SSE4_1
 
 template <typename T, size_t N>
 struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2>::compile_time>>
@@ -74,7 +350,7 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
         else if constexpr (std::is_same_v<T, int8_t>)
         {
 #if SIMD_SSE4_1
-            return static_cast<int8_t>(_mm_extract_epi8(*src, index % 16));
+            return extract_epi8_runtime(*src, index);
 #else
             alignas(16) int8_t tmp[16];
             _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
@@ -85,7 +361,7 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
         else if constexpr (std::is_same_v<T, uint8_t>)
         {
 #if SIMD_SSE4_1
-            return static_cast<uint8_t>(_mm_extract_epi8(*src, index % 16));
+            return extract_epu8_runtime(*src, index);
 #else
             alignas(16) uint8_t tmp[16];
             _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
@@ -110,7 +386,7 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
         else if constexpr (std::is_same_v<T, int32_t>)
         {
 #if SIMD_SSE4_1
-            return static_cast<int32_t>(_mm_extract_epi32(*src, index % 4));
+            return extract_epi32_runtime(*src, index);
 #else
             alignas(16) int32_t tmp[4];
             _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
@@ -121,7 +397,7 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
         else if constexpr (std::is_same_v<T, uint32_t>)
         {
 #if SIMD_SSE4_1
-            return static_cast<uint32_t>(_mm_extract_epi32(*src, index % 4));
+            return extract_epu32_runtime(*src, index);
 #else
             alignas(16) uint32_t tmp[4];
             _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
@@ -129,12 +405,23 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
 #endif
         }
 
-        else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>)
+        else if constexpr (std::is_same_v<T, int64_t>)
         {
 #if SIMD_SSE4_1
-            return static_cast<T>(_mm_extract_epi64(*src, index % 2));
+            return extract_epi64_runtime(*src, index);
 #else
-            alignas(16) T tmp[2];
+            alignas(16) int64_t tmp[2];
+            _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
+            return tmp[index % 2];
+#endif
+        }
+
+        else if constexpr (std::is_same_v<T, uint64_t>)
+        {
+#if SIMD_SSE4_1
+            return extract_epu64_runtime(*src, index);
+#else
+            alignas(16) uint64_t tmp[2];
             _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
             return tmp[index % 2];
 #endif
@@ -160,7 +447,7 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
         else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>)
         {
 #if SIMD_SSE4_1
-            *dst = _mm_insert_epi8(*dst, static_cast<int>(value), index % 16);
+            *dst = insert_epi8_runtime(*dst, index, static_cast<int>(value));
 #else
             alignas(16) int8_t tmp[16];
             _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *dst);
@@ -178,7 +465,7 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
         else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>)
         {
 #if SIMD_SSE4_1
-            *dst = _mm_insert_epi32(*dst, static_cast<int>(value), index % 4);
+            *dst = insert_epi32_runtime(*dst, index, static_cast<int>(value));
 #else
             alignas(16) int32_t tmp[4];
             _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *dst);
@@ -189,7 +476,7 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
         else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>)
         {
 #if SIMD_SSE4_1
-            *dst = _mm_insert_epi64(*dst, static_cast<long long>(value), index % 2);
+            *dst = insert_epi64_runtime(*dst, index, static_cast<long long>(value));
 #else
             alignas(16) int64_t tmp[2];
             _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *dst);
@@ -823,6 +1110,5 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SS
 } // namespace vector_simd
 
 #endif // SIMD_ARCH_X86 && SIMD_HAS_SSE2
-
 
 #endif // End of include guard: LIB_SIMD_IMPL_SSE2_VECTOR_OPS_HPP_9b0cmo
