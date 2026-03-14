@@ -628,6 +628,26 @@ struct math_ops<T, N, sse2_tag>
     }
 };
 
+template <typename T, size_t N>
+struct math_ops<T, N, sse3_tag> : math_ops<T, N, sse2_tag>
+{
+};
+
+template <typename T, size_t N>
+struct math_ops<T, N, ssse3_tag> : math_ops<T, N, sse2_tag>
+{
+};
+
+template <typename T, size_t N>
+struct math_ops<T, N, sse4_1_tag> : math_ops<T, N, sse2_tag>
+{
+};
+
+template <typename T, size_t N>
+struct math_ops<T, N, sse4_2_tag> : math_ops<T, N, sse2_tag>
+{
+};
+
 } // namespace vector_simd::detail
 
 #endif

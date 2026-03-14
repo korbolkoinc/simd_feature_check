@@ -332,7 +332,7 @@ static SIMD_INLINE __m256i insert_epi64_runtime_avx(__m256i dst, size_t index, l
 #endif // SIMD_AVX2
 
 template <typename T, size_t N>
-struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AVX>::compile_time>>
+struct vector_ops<T, N, avx_tag>
 {
     using register_t = typename register_type<T, avx_tag>::type;
 
