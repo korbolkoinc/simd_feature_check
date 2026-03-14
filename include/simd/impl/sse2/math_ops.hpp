@@ -313,22 +313,14 @@ struct math_ops<T, N, sse2_tag>
     {
         if constexpr (std::is_same_v<T, float>)
         {
-            alignas(16) float tmp[4];
-            _mm_store_ps(tmp, *src);
-            for (int i = 0; i < 4; ++i)
-            {
-                tmp[i] = std::sin(tmp[i]);
-            }
-            *dst = _mm_load_ps(tmp);
+            *dst = sse2_math_detail::sin_ps(*src);
         }
         else if constexpr (std::is_same_v<T, double>)
         {
             alignas(16) double tmp[2];
             _mm_store_pd(tmp, *src);
-            for (int i = 0; i < 2; ++i)
-            {
-                tmp[i] = std::sin(tmp[i]);
-            }
+            tmp[0] = std::sin(tmp[0]);
+            tmp[1] = std::sin(tmp[1]);
             *dst = _mm_load_pd(tmp);
         }
     }
@@ -338,22 +330,14 @@ struct math_ops<T, N, sse2_tag>
     {
         if constexpr (std::is_same_v<T, float>)
         {
-            alignas(16) float tmp[4];
-            _mm_store_ps(tmp, *src);
-            for (int i = 0; i < 4; ++i)
-            {
-                tmp[i] = std::cos(tmp[i]);
-            }
-            *dst = _mm_load_ps(tmp);
+            *dst = sse2_math_detail::cos_ps(*src);
         }
         else if constexpr (std::is_same_v<T, double>)
         {
             alignas(16) double tmp[2];
             _mm_store_pd(tmp, *src);
-            for (int i = 0; i < 2; ++i)
-            {
-                tmp[i] = std::cos(tmp[i]);
-            }
+            tmp[0] = std::cos(tmp[0]);
+            tmp[1] = std::cos(tmp[1]);
             *dst = _mm_load_pd(tmp);
         }
     }
@@ -363,22 +347,14 @@ struct math_ops<T, N, sse2_tag>
     {
         if constexpr (std::is_same_v<T, float>)
         {
-            alignas(16) float tmp[4];
-            _mm_store_ps(tmp, *src);
-            for (int i = 0; i < 4; ++i)
-            {
-                tmp[i] = std::tan(tmp[i]);
-            }
-            *dst = _mm_load_ps(tmp);
+            *dst = sse2_math_detail::tan_ps(*src);
         }
         else if constexpr (std::is_same_v<T, double>)
         {
             alignas(16) double tmp[2];
             _mm_store_pd(tmp, *src);
-            for (int i = 0; i < 2; ++i)
-            {
-                tmp[i] = std::tan(tmp[i]);
-            }
+            tmp[0] = std::tan(tmp[0]);
+            tmp[1] = std::tan(tmp[1]);
             *dst = _mm_load_pd(tmp);
         }
     }
@@ -388,22 +364,14 @@ struct math_ops<T, N, sse2_tag>
     {
         if constexpr (std::is_same_v<T, float>)
         {
-            alignas(16) float tmp[4];
-            _mm_store_ps(tmp, *src);
-            for (int i = 0; i < 4; ++i)
-            {
-                tmp[i] = std::exp(tmp[i]);
-            }
-            *dst = _mm_load_ps(tmp);
+            *dst = sse2_math_detail::exp_ps(*src);
         }
         else if constexpr (std::is_same_v<T, double>)
         {
             alignas(16) double tmp[2];
             _mm_store_pd(tmp, *src);
-            for (int i = 0; i < 2; ++i)
-            {
-                tmp[i] = std::exp(tmp[i]);
-            }
+            tmp[0] = std::exp(tmp[0]);
+            tmp[1] = std::exp(tmp[1]);
             *dst = _mm_load_pd(tmp);
         }
     }
@@ -413,24 +381,177 @@ struct math_ops<T, N, sse2_tag>
     {
         if constexpr (std::is_same_v<T, float>)
         {
-            alignas(16) float tmp[4];
-            _mm_store_ps(tmp, *src);
-            for (int i = 0; i < 4; ++i)
-            {
-                tmp[i] = std::log(tmp[i]);
-            }
-            *dst = _mm_load_ps(tmp);
+            *dst = sse2_math_detail::log_ps(*src);
         }
         else if constexpr (std::is_same_v<T, double>)
         {
             alignas(16) double tmp[2];
             _mm_store_pd(tmp, *src);
-            for (int i = 0; i < 2; ++i)
-            {
-                tmp[i] = std::log(tmp[i]);
-            }
+            tmp[0] = std::log(tmp[0]);
+            tmp[1] = std::log(tmp[1]);
             *dst = _mm_load_pd(tmp);
         }
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    static SIMD_INLINE void rsqrt(register_t* dst, const register_t* src)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            __m128 approx = _mm_rsqrt_ps(*src);
+            __m128 half   = _mm_set1_ps(0.5f);
+            __m128 three  = _mm_set1_ps(3.0f);
+            *dst = _mm_mul_ps(_mm_mul_ps(approx, half),
+                              _mm_sub_ps(three, _mm_mul_ps(*src, _mm_mul_ps(approx, approx))));
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(16) double tmp[2];
+            _mm_store_pd(tmp, *src);
+            tmp[0] = 1.0 / std::sqrt(tmp[0]);
+            tmp[1] = 1.0 / std::sqrt(tmp[1]);
+            *dst = _mm_load_pd(tmp);
+        }
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    static SIMD_INLINE void rcp(register_t* dst, const register_t* src)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            __m128 approx  = _mm_rcp_ps(*src);
+            __m128 two     = _mm_set1_ps(2.0f);
+            *dst = _mm_sub_ps(_mm_mul_ps(two, approx),
+                              _mm_mul_ps(_mm_mul_ps(approx, approx), *src));
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(16) double tmp[2];
+            _mm_store_pd(tmp, *src);
+            tmp[0] = 1.0 / tmp[0];
+            tmp[1] = 1.0 / tmp[1];
+            *dst = _mm_load_pd(tmp);
+        }
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    static SIMD_INLINE void floor(register_t* dst, const register_t* src)
+    {
+#if SIMD_SSE4_1
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_floor_ps(*src);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_floor_pd(*src);
+        }
+#else
+        if constexpr (std::is_same_v<T, float>)
+        {
+            __m128i  n = _mm_cvttps_epi32(*src);
+            __m128   fn = _mm_cvtepi32_ps(n);
+            __m128   neg = _mm_cmplt_ps(fn, *src);
+            *dst = _mm_sub_ps(fn, _mm_and_ps(neg, _mm_set1_ps(1.0f)));
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(16) double tmp[2];
+            _mm_store_pd(tmp, *src);
+            tmp[0] = std::floor(tmp[0]);
+            tmp[1] = std::floor(tmp[1]);
+            *dst = _mm_load_pd(tmp);
+        }
+#endif
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    static SIMD_INLINE void ceil(register_t* dst, const register_t* src)
+    {
+#if SIMD_SSE4_1
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_ceil_ps(*src);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_ceil_pd(*src);
+        }
+#else
+        if constexpr (std::is_same_v<T, float>)
+        {
+            __m128i  n = _mm_cvttps_epi32(*src);
+            __m128   fn = _mm_cvtepi32_ps(n);
+            __m128   pos = _mm_cmpgt_ps(fn, *src);
+            *dst = _mm_add_ps(fn, _mm_and_ps(pos, _mm_set1_ps(1.0f)));
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(16) double tmp[2];
+            _mm_store_pd(tmp, *src);
+            tmp[0] = std::ceil(tmp[0]);
+            tmp[1] = std::ceil(tmp[1]);
+            *dst = _mm_load_pd(tmp);
+        }
+#endif
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    static SIMD_INLINE void round(register_t* dst, const register_t* src)
+    {
+#if SIMD_SSE4_1
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_round_ps(*src, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_round_pd(*src, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+        }
+#else
+        if constexpr (std::is_same_v<T, float>)
+        {
+            static const __m128 magic = _mm_set1_ps(12582912.0f);
+            __m128 round = _mm_sub_ps(_mm_add_ps(*src, magic), magic);
+            *dst = round;
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(16) double tmp[2];
+            _mm_store_pd(tmp, *src);
+            tmp[0] = std::round(tmp[0]);
+            tmp[1] = std::round(tmp[1]);
+            *dst = _mm_load_pd(tmp);
+        }
+#endif
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    static SIMD_INLINE void trunc(register_t* dst, const register_t* src)
+    {
+#if SIMD_SSE4_1
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_round_ps(*src, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm_round_pd(*src, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC);
+        }
+#else
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm_cvtepi32_ps(_mm_cvttps_epi32(*src));
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            alignas(16) double tmp[2];
+            _mm_store_pd(tmp, *src);
+            tmp[0] = std::trunc(tmp[0]);
+            tmp[1] = std::trunc(tmp[1]);
+            *dst = _mm_load_pd(tmp);
+        }
+#endif
     }
 
     static SIMD_INLINE void fmadd(register_t* dst, const register_t* a, const register_t* b,
