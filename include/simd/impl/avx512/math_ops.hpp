@@ -63,7 +63,6 @@ SIMD_INLINE __m512 log_ps(__m512 x)
     const __m512 one      = _mm512_set1_ps(1.0f);
     const __m512 half     = _mm512_set1_ps(0.5f);
     const __m512 sqrthf   = _mm512_set1_ps(0.707106781186547524f);
-    const __m512 ln2      = _mm512_set1_ps(0.693147180559945f);
     const __m512 ln2_hi   = _mm512_set1_ps(0.693359375f);
     const __m512 ln2_lo   = _mm512_set1_ps(-2.12194440e-4f);
     const __m512 p0       = _mm512_set1_ps(7.0376836292e-2f);
@@ -106,10 +105,10 @@ SIMD_INLINE __m512 log_ps(__m512 x)
     y = _mm512_fmadd_ps(y, x, p8);
     y = _mm512_mul_ps(y, _mm512_mul_ps(x, z));
 
-    y = _mm512_fmadd_ps(e, ln2_hi, y);
+    y = _mm512_fmadd_ps(e, ln2_lo, y);
     y = _mm512_fnmadd_ps(z, half, y);
     x = _mm512_add_ps(x, y);
-    x = _mm512_fmadd_ps(e, ln2, x);
+    x = _mm512_fmadd_ps(e, ln2_hi, x);
     x = _mm512_mask_or_ps(x, invalid, x, _mm512_castsi512_ps(_mm512_set1_epi32(0x7FC00000)));
     return x;
 }
@@ -161,16 +160,16 @@ SIMD_INLINE void sincos_ps(__m512 x, __m512* s, __m512* c)
 
     __m512 z = _mm512_mul_ps(x, x);
 
-    __m512 sy = _mm512_fmadd_ps(sc_p0, z, sc_p1);
-    sy = _mm512_fmadd_ps(sy, z, sc_p2);
+    __m512 sy = _mm512_fmadd_ps(cc_p0, z, cc_p1);
+    sy = _mm512_fmadd_ps(sy, z, cc_p2);
     sy = _mm512_mul_ps(_mm512_mul_ps(sy, z), z);
     sy = _mm512_fnmadd_ps(z, half, sy);
     sy = _mm512_add_ps(sy, one);
 
-    __m512 cy = _mm512_fmadd_ps(cc_p0, z, cc_p1);
-    cy = _mm512_fmadd_ps(cy, z, cc_p2);
-    cy = _mm512_fmadd_ps(_mm512_mul_ps(cy, z), z, _mm512_fnmadd_ps(z, half, one));
-    cy = _mm512_mul_ps(cy, x);
+    __m512 cy = _mm512_fmadd_ps(sc_p0, z, sc_p1);
+    cy = _mm512_fmadd_ps(cy, z, sc_p2);
+    cy = _mm512_mul_ps(_mm512_mul_ps(cy, z), z);
+    cy = _mm512_fmadd_ps(cy, x, x);
 
     *s = _mm512_mask_blend_ps(poly_mask, cy, sy);
     *c = _mm512_mask_blend_ps(poly_mask, sy, cy);

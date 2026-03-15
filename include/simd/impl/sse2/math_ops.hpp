@@ -63,7 +63,6 @@ SIMD_INLINE __m128 log_ps(__m128 x)
     static const __m128 one      = _mm_set1_ps(1.0f);
     static const __m128 half     = _mm_set1_ps(0.5f);
     static const __m128 sqrthf   = _mm_set1_ps(0.707106781186547524f);
-    static const __m128 ln2      = _mm_set1_ps(0.693147180559945f);
     static const __m128 ln2_hi   = _mm_set1_ps(0.693359375f);
     static const __m128 ln2_lo   = _mm_set1_ps(-2.12194440e-4f);
     static const __m128 p0       = _mm_set1_ps(7.0376836292e-2f);
@@ -105,12 +104,11 @@ SIMD_INLINE __m128 log_ps(__m128 x)
     y = _mm_add_ps(_mm_mul_ps(y, x), p8);
     y = _mm_mul_ps(y, _mm_mul_ps(x, z));
 
-    __m128 tmp2 = _mm_mul_ps(e, ln2_hi);
+    __m128 tmp2 = _mm_mul_ps(e, ln2_lo);
     y = _mm_add_ps(y, tmp2);
-    tmp2 = _mm_mul_ps(e, ln2_lo);
     y = _mm_sub_ps(y, _mm_mul_ps(z, half));
     x = _mm_add_ps(x, y);
-    x = _mm_add_ps(x, _mm_mul_ps(e, ln2));
+    x = _mm_add_ps(x, _mm_mul_ps(e, ln2_hi));
     x = _mm_or_ps(x, invalid);
     return x;
 }
@@ -164,19 +162,18 @@ SIMD_INLINE void sincos_ps(__m128 x, __m128* s, __m128* c)
     sign_bit_sin = _mm_xor_ps(sign_bit_sin, swap_sign_bit_sin);
 
     __m128 z = _mm_mul_ps(x, x);
-    __m128 sy = sc_p0;
-    sy = _mm_add_ps(_mm_mul_ps(sy, z), sc_p1);
-    sy = _mm_add_ps(_mm_mul_ps(sy, z), sc_p2);
+    __m128 sy = cc_p0;
+    sy = _mm_add_ps(_mm_mul_ps(sy, z), cc_p1);
+    sy = _mm_add_ps(_mm_mul_ps(sy, z), cc_p2);
     sy = _mm_mul_ps(_mm_mul_ps(sy, z), z);
     sy = _mm_sub_ps(sy, _mm_mul_ps(z, half));
     sy = _mm_add_ps(sy, one);
 
-    __m128 cy = cc_p0;
-    cy = _mm_add_ps(_mm_mul_ps(cy, z), cc_p1);
-    cy = _mm_add_ps(_mm_mul_ps(cy, z), cc_p2);
-    cy = _mm_sub_ps(_mm_mul_ps(_mm_mul_ps(cy, z), z), _mm_mul_ps(z, half));
-    cy = _mm_add_ps(cy, one);
-    cy = _mm_mul_ps(cy, x);
+    __m128 cy = sc_p0;
+    cy = _mm_add_ps(_mm_mul_ps(cy, z), sc_p1);
+    cy = _mm_add_ps(_mm_mul_ps(cy, z), sc_p2);
+    cy = _mm_mul_ps(_mm_mul_ps(cy, z), z);
+    cy = _mm_add_ps(_mm_mul_ps(cy, x), x);
 
     xmm1 = _mm_andnot_ps(poly_mask, cy);
     xmm2 = _mm_and_ps(poly_mask, sy);
@@ -449,7 +446,7 @@ struct math_ops<T, N, sse2_tag>
         {
             __m128i  n = _mm_cvttps_epi32(*src);
             __m128   fn = _mm_cvtepi32_ps(n);
-            __m128   neg = _mm_cmplt_ps(fn, *src);
+            __m128   neg = _mm_cmpgt_ps(fn, *src);
             *dst = _mm_sub_ps(fn, _mm_and_ps(neg, _mm_set1_ps(1.0f)));
         }
         else if constexpr (std::is_same_v<T, double>)
@@ -480,7 +477,7 @@ struct math_ops<T, N, sse2_tag>
         {
             __m128i  n = _mm_cvttps_epi32(*src);
             __m128   fn = _mm_cvtepi32_ps(n);
-            __m128   pos = _mm_cmpgt_ps(fn, *src);
+            __m128   pos = _mm_cmplt_ps(fn, *src);
             *dst = _mm_add_ps(fn, _mm_and_ps(pos, _mm_set1_ps(1.0f)));
         }
         else if constexpr (std::is_same_v<T, double>)

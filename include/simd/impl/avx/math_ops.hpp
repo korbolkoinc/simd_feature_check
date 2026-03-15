@@ -64,7 +64,6 @@ SIMD_INLINE __m256 log_ps(__m256 x)
     static const __m256 one      = _mm256_set1_ps(1.0f);
     static const __m256 half     = _mm256_set1_ps(0.5f);
     static const __m256 sqrthf   = _mm256_set1_ps(0.707106781186547524f);
-    static const __m256 ln2      = _mm256_set1_ps(0.693147180559945f);
     static const __m256 ln2_hi   = _mm256_set1_ps(0.693359375f);
     static const __m256 ln2_lo   = _mm256_set1_ps(-2.12194440e-4f);
     static const __m256 p0       = _mm256_set1_ps(7.0376836292e-2f);
@@ -106,10 +105,10 @@ SIMD_INLINE __m256 log_ps(__m256 x)
     y = _mm256_add_ps(_mm256_mul_ps(y, x), p8);
     y = _mm256_mul_ps(y, _mm256_mul_ps(x, z));
 
-    y = _mm256_add_ps(y, _mm256_mul_ps(e, ln2_hi));
+    y = _mm256_add_ps(y, _mm256_mul_ps(e, ln2_lo));
     y = _mm256_sub_ps(y, _mm256_mul_ps(z, half));
     x = _mm256_add_ps(x, y);
-    x = _mm256_add_ps(x, _mm256_mul_ps(e, ln2));
+    x = _mm256_add_ps(x, _mm256_mul_ps(e, ln2_hi));
     x = _mm256_or_ps(x, invalid);
     return x;
 }
@@ -159,19 +158,18 @@ SIMD_INLINE void sincos_ps(__m256 x, __m256* s, __m256* c)
 
     __m256 z = _mm256_mul_ps(x, x);
 
-    __m256 sy = sc_p0;
-    sy = _mm256_add_ps(_mm256_mul_ps(sy, z), sc_p1);
-    sy = _mm256_add_ps(_mm256_mul_ps(sy, z), sc_p2);
+    __m256 sy = cc_p0;
+    sy = _mm256_add_ps(_mm256_mul_ps(sy, z), cc_p1);
+    sy = _mm256_add_ps(_mm256_mul_ps(sy, z), cc_p2);
     sy = _mm256_mul_ps(_mm256_mul_ps(sy, z), z);
     sy = _mm256_sub_ps(sy, _mm256_mul_ps(z, half));
     sy = _mm256_add_ps(sy, one);
 
-    __m256 cy = cc_p0;
-    cy = _mm256_add_ps(_mm256_mul_ps(cy, z), cc_p1);
-    cy = _mm256_add_ps(_mm256_mul_ps(cy, z), cc_p2);
-    cy = _mm256_sub_ps(_mm256_mul_ps(_mm256_mul_ps(cy, z), z), _mm256_mul_ps(z, half));
-    cy = _mm256_add_ps(cy, one);
-    cy = _mm256_mul_ps(cy, x);
+    __m256 cy = sc_p0;
+    cy = _mm256_add_ps(_mm256_mul_ps(cy, z), sc_p1);
+    cy = _mm256_add_ps(_mm256_mul_ps(cy, z), sc_p2);
+    cy = _mm256_mul_ps(_mm256_mul_ps(cy, z), z);
+    cy = _mm256_add_ps(_mm256_mul_ps(cy, x), x);
 
     __m256 xmm1 = _mm256_andnot_ps(poly_mask, cy);
     __m256 xmm2 = _mm256_and_ps(poly_mask, sy);
