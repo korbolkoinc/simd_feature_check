@@ -60,7 +60,6 @@ SIMD_INLINE __m128 exp_ps(__m128 x)
 SIMD_INLINE __m128 log_ps(__m128 x)
 {
     static const __m128 min_norm = _mm_set1_ps(1.17549435e-38f);
-    static const __m128 nan_mask = _mm_set1_ps(-0.0f);
     static const __m128 one      = _mm_set1_ps(1.0f);
     static const __m128 half     = _mm_set1_ps(0.5f);
     static const __m128 sqrthf   = _mm_set1_ps(0.707106781186547524f);
@@ -122,7 +121,6 @@ SIMD_INLINE void sincos_ps(__m128 x, __m128* s, __m128* c)
     static const __m128 dp2       = _mm_set1_ps(-2.4187564849853515625e-4f);
     static const __m128 dp3       = _mm_set1_ps(-3.77489497744594108e-8f);
     static const __m128 fopi      = _mm_set1_ps(1.2732395447351628f);
-    static const __m128 thr_f     = _mm_set1_ps(8388608.0f);
     static const __m128 sign_mask = _mm_set1_ps(-0.0f);
     static const __m128 one       = _mm_set1_ps(1.0f);
     static const __m128 half      = _mm_set1_ps(0.5f);
@@ -241,7 +239,7 @@ struct math_ops<T, N, sse2_tag>
             _mm_store_si128(reinterpret_cast<__m128i*>(tmp), *src);
             for (int i = 0; i < 16; ++i)
             {
-                tmp[i] = std::abs(tmp[i]);
+                tmp[i] = static_cast<int8_t>(tmp[i] < 0 ? -tmp[i] : tmp[i]);
             }
             *dst = _mm_load_si128(reinterpret_cast<const __m128i*>(tmp));
 #endif
@@ -559,34 +557,19 @@ struct math_ops<T, N, sse2_tag>
     {
 #if SIMD_FMA
         if constexpr (std::is_same_v<T, float>)
-        {
             *dst = _mm_fmadd_ps(*a, *b, *c);
-        }
         else if constexpr (std::is_same_v<T, double>)
-        {
             *dst = _mm_fmadd_pd(*a, *b, *c);
-        }
         else
         {
             register_t tmp;
-            vector_ops<T, N,
-                       std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2>::compile_time>>::
-                mul(&tmp, a, b);
-            vector_ops<T, N,
-                       std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2>::compile_time>>::
-                add(dst, &tmp, c);
+            vector_ops<T, N, sse2_tag>::mul(&tmp, a, b);
+            vector_ops<T, N, sse2_tag>::add(dst, &tmp, c);
         }
 #else
         register_t tmp;
-        vector_ops<
-            T, N,
-            std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2>::compile_time>>::mul(&tmp,
-                                                                                             a, b);
-        vector_ops<
-            T, N,
-            std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2>::compile_time>>::add(dst,
-                                                                                             &tmp,
-                                                                                             c);
+        vector_ops<T, N, sse2_tag>::mul(&tmp, a, b);
+        vector_ops<T, N, sse2_tag>::add(dst, &tmp, c);
 #endif
     }
 
@@ -595,35 +578,19 @@ struct math_ops<T, N, sse2_tag>
     {
 #if SIMD_FMA
         if constexpr (std::is_same_v<T, float>)
-        {
             *dst = _mm_fmsub_ps(*a, *b, *c);
-        }
         else if constexpr (std::is_same_v<T, double>)
-        {
             *dst = _mm_fmsub_pd(*a, *b, *c);
-        }
         else
         {
             register_t tmp;
-            vector_ops<T, N,
-                       std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2>::compile_time>>::
-                mul(&tmp, a, b);
-            vector_ops<T, N,
-                       std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2>::compile_time>>::
-                sub(dst, &tmp, c);
+            vector_ops<T, N, sse2_tag>::mul(&tmp, a, b);
+            vector_ops<T, N, sse2_tag>::sub(dst, &tmp, c);
         }
 #else
-        // No FMA instructions available, use separate multiply and subtract
         register_t tmp;
-        vector_ops<
-            T, N,
-            std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2>::compile_time>>::mul(&tmp,
-                                                                                             a, b);
-        vector_ops<
-            T, N,
-            std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2>::compile_time>>::sub(dst,
-                                                                                             &tmp,
-                                                                                             c);
+        vector_ops<T, N, sse2_tag>::mul(&tmp, a, b);
+        vector_ops<T, N, sse2_tag>::sub(dst, &tmp, c);
 #endif
     }
 };

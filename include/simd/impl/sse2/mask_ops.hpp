@@ -360,11 +360,11 @@ struct mask_ops<T, N, sse2_tag>
     {
         if constexpr (std::is_same_v<T, float>)
         {
-            return _mm_movemask_ps(*mask);
+            return static_cast<uint64_t>(_mm_movemask_ps(*mask));
         }
         else if constexpr (std::is_same_v<T, double>)
         {
-            return _mm_movemask_pd(*mask);
+            return static_cast<uint64_t>(_mm_movemask_pd(*mask));
         }
         else
         {

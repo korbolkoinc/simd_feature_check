@@ -385,7 +385,8 @@ public:
     static Vector zeros()
     {
         Vector result;
-        for (size_t i = 0; i < num_registers; ++i) mem_ops::set_zero(&result.registers[i]);
+        std::array<T, storage_size> tmp{};
+        mem_ops::load_aligned(result.data(), tmp.data());
         return result;
     }
 
