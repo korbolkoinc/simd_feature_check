@@ -181,8 +181,9 @@ SIMD_INLINE void sincos_ps(__m128 x, __m128* s, __m128* c)
 
     xmm1 = _mm_andnot_ps(poly_mask, sy);
     xmm2 = _mm_and_ps(poly_mask, cy);
-    *c = _mm_or_ps(xmm1, xmm2);
-    *s = _mm_xor_ps(xmm3, sign_bit_sin);
+    *s = _mm_or_ps(xmm1, xmm2);
+    *c = xmm3;
+    *s = _mm_xor_ps(*s, sign_bit_sin);
     *c = _mm_xor_ps(*c, sign_bit_cos);
 }
 

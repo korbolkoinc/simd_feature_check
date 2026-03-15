@@ -177,8 +177,9 @@ SIMD_INLINE void sincos_ps(__m256 x, __m256* s, __m256* c)
 
     xmm1 = _mm256_andnot_ps(poly_mask, sy);
     xmm2 = _mm256_and_ps(poly_mask, cy);
-    *c = _mm256_or_ps(xmm1, xmm2);
-    *s = _mm256_xor_ps(xmm3, sign_bit_sin);
+    *s = _mm256_or_ps(xmm1, xmm2);
+    *c = xmm3;
+    *s = _mm256_xor_ps(*s, sign_bit_sin);
     *c = _mm256_xor_ps(*c, sign_bit_cos);
 }
 
