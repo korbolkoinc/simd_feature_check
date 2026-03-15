@@ -14,7 +14,7 @@
 namespace vector_simd::detail
 {
 template <typename T, size_t N>
-struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AVX>::compile_time>>
+struct mask_ops<T, N, avx_tag>
 {
     using mask_register_t = typename mask_register_type<T, avx_tag>::type;
     using register_t = typename register_type<T, avx_tag>::type;
@@ -629,6 +629,12 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AVX>
         }
     }
 };
+
+template <typename T, size_t N>
+struct mask_ops<T, N, avx2_tag> : mask_ops<T, N, avx_tag>
+{
+};
+
 } // namespace vector_simd::detail
 
 #endif

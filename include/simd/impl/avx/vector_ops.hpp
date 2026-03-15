@@ -332,7 +332,7 @@ static SIMD_INLINE __m256i insert_epi64_runtime_avx(__m256i dst, size_t index, l
 #endif // SIMD_AVX2
 
 template <typename T, size_t N>
-struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AVX>::compile_time>>
+struct vector_ops<T, N, avx_tag>
 {
     using register_t = typename register_type<T, avx_tag>::type;
 
@@ -1330,6 +1330,293 @@ struct vector_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::AV
             }
         }
     }
+
+    static SIMD_INLINE void clamp(register_t* dst, const register_t* src,
+                                  const register_t* lo, const register_t* hi)
+    {
+        register_t tmp;
+        min(&tmp, src, hi);
+        max(dst, &tmp, lo);
+    }
+
+    static SIMD_INLINE void add_sat(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, int8_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_adds_epi8(*a, *b);
+#else
+            __m128i alo = _mm256_extractf128_si256(*a, 0), ahi = _mm256_extractf128_si256(*a, 1);
+            __m128i blo = _mm256_extractf128_si256(*b, 0), bhi = _mm256_extractf128_si256(*b, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_adds_epi8(alo, blo)), _mm_adds_epi8(ahi, bhi), 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, uint8_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_adds_epu8(*a, *b);
+#else
+            __m128i alo = _mm256_extractf128_si256(*a, 0), ahi = _mm256_extractf128_si256(*a, 1);
+            __m128i blo = _mm256_extractf128_si256(*b, 0), bhi = _mm256_extractf128_si256(*b, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_adds_epu8(alo, blo)), _mm_adds_epu8(ahi, bhi), 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, int16_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_adds_epi16(*a, *b);
+#else
+            __m128i alo = _mm256_extractf128_si256(*a, 0), ahi = _mm256_extractf128_si256(*a, 1);
+            __m128i blo = _mm256_extractf128_si256(*b, 0), bhi = _mm256_extractf128_si256(*b, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_adds_epi16(alo, blo)), _mm_adds_epi16(ahi, bhi), 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, uint16_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_adds_epu16(*a, *b);
+#else
+            __m128i alo = _mm256_extractf128_si256(*a, 0), ahi = _mm256_extractf128_si256(*a, 1);
+            __m128i blo = _mm256_extractf128_si256(*b, 0), bhi = _mm256_extractf128_si256(*b, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_adds_epu16(alo, blo)), _mm_adds_epu16(ahi, bhi), 1);
+#endif
+        }
+        else
+        {
+            add(dst, a, b);
+        }
+    }
+
+    static SIMD_INLINE void sub_sat(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, int8_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_subs_epi8(*a, *b);
+#else
+            __m128i alo = _mm256_extractf128_si256(*a, 0), ahi = _mm256_extractf128_si256(*a, 1);
+            __m128i blo = _mm256_extractf128_si256(*b, 0), bhi = _mm256_extractf128_si256(*b, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_subs_epi8(alo, blo)), _mm_subs_epi8(ahi, bhi), 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, uint8_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_subs_epu8(*a, *b);
+#else
+            __m128i alo = _mm256_extractf128_si256(*a, 0), ahi = _mm256_extractf128_si256(*a, 1);
+            __m128i blo = _mm256_extractf128_si256(*b, 0), bhi = _mm256_extractf128_si256(*b, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_subs_epu8(alo, blo)), _mm_subs_epu8(ahi, bhi), 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, int16_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_subs_epi16(*a, *b);
+#else
+            __m128i alo = _mm256_extractf128_si256(*a, 0), ahi = _mm256_extractf128_si256(*a, 1);
+            __m128i blo = _mm256_extractf128_si256(*b, 0), bhi = _mm256_extractf128_si256(*b, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_subs_epi16(alo, blo)), _mm_subs_epi16(ahi, bhi), 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, uint16_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_subs_epu16(*a, *b);
+#else
+            __m128i alo = _mm256_extractf128_si256(*a, 0), ahi = _mm256_extractf128_si256(*a, 1);
+            __m128i blo = _mm256_extractf128_si256(*b, 0), bhi = _mm256_extractf128_si256(*b, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_subs_epu16(alo, blo)), _mm_subs_epu16(ahi, bhi), 1);
+#endif
+        }
+        else
+        {
+            sub(dst, a, b);
+        }
+    }
+
+    static SIMD_INLINE void shift_left(register_t* dst, const register_t* src, int count)
+    {
+        if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_slli_epi16(*src, count);
+#else
+            __m128i lo = _mm256_extractf128_si256(*src, 0), hi = _mm256_extractf128_si256(*src, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_slli_epi16(lo, count)), _mm_slli_epi16(hi, count), 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_slli_epi32(*src, count);
+#else
+            __m128i lo = _mm256_extractf128_si256(*src, 0), hi = _mm256_extractf128_si256(*src, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_slli_epi32(lo, count)), _mm_slli_epi32(hi, count), 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_slli_epi64(*src, count);
+#else
+            __m128i lo = _mm256_extractf128_si256(*src, 0), hi = _mm256_extractf128_si256(*src, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_slli_epi64(lo, count)), _mm_slli_epi64(hi, count), 1);
+#endif
+        }
+        else
+        {
+            *dst = *src;
+        }
+    }
+
+    static SIMD_INLINE void shift_right(register_t* dst, const register_t* src, int count)
+    {
+        if constexpr (std::is_same_v<T, int16_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_srai_epi16(*src, count);
+#else
+            __m128i lo = _mm256_extractf128_si256(*src, 0), hi = _mm256_extractf128_si256(*src, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_srai_epi16(lo, count)), _mm_srai_epi16(hi, count), 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, uint16_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_srli_epi16(*src, count);
+#else
+            __m128i lo = _mm256_extractf128_si256(*src, 0), hi = _mm256_extractf128_si256(*src, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_srli_epi16(lo, count)), _mm_srli_epi16(hi, count), 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, int32_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_srai_epi32(*src, count);
+#else
+            __m128i lo = _mm256_extractf128_si256(*src, 0), hi = _mm256_extractf128_si256(*src, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_srai_epi32(lo, count)), _mm_srai_epi32(hi, count), 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, uint32_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_srli_epi32(*src, count);
+#else
+            __m128i lo = _mm256_extractf128_si256(*src, 0), hi = _mm256_extractf128_si256(*src, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_srli_epi32(lo, count)), _mm_srli_epi32(hi, count), 1);
+#endif
+        }
+        else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>)
+        {
+#if SIMD_AVX2
+            *dst = _mm256_srli_epi64(*src, count);
+#else
+            __m128i lo = _mm256_extractf128_si256(*src, 0), hi = _mm256_extractf128_si256(*src, 1);
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_srli_epi64(lo, count)), _mm_srli_epi64(hi, count), 1);
+#endif
+        }
+        else
+        {
+            *dst = *src;
+        }
+    }
+
+    static SIMD_INLINE T reduce_add(const register_t* src)
+    {
+        return horizontal_sum(src);
+    }
+
+    static SIMD_INLINE T reduce_min(const register_t* src)
+    {
+        return horizontal_min(src);
+    }
+
+    static SIMD_INLINE T reduce_max(const register_t* src)
+    {
+        return horizontal_max(src);
+    }
+
+    static SIMD_INLINE T dot(const register_t* a, const register_t* b)
+    {
+        register_t tmp;
+        mul(&tmp, a, b);
+        return horizontal_sum(&tmp);
+    }
+
+    static SIMD_INLINE void interleave_lo(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm256_unpacklo_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm256_unpacklo_pd(*a, *b);
+        }
+        else
+        {
+#if SIMD_AVX2
+            if constexpr (sizeof(T) == 1)
+                *dst = _mm256_unpacklo_epi8(*a, *b);
+            else if constexpr (sizeof(T) == 2)
+                *dst = _mm256_unpacklo_epi16(*a, *b);
+            else if constexpr (sizeof(T) == 4)
+                *dst = _mm256_unpacklo_epi32(*a, *b);
+            else
+                *dst = _mm256_unpacklo_epi64(*a, *b);
+#else
+            __m128i alo = _mm256_extractf128_si256(*a, 0), ahi = _mm256_extractf128_si256(*a, 1);
+            __m128i blo = _mm256_extractf128_si256(*b, 0), bhi = _mm256_extractf128_si256(*b, 1);
+            __m128i rlo, rhi;
+            if constexpr (sizeof(T) == 1) { rlo = _mm_unpacklo_epi8(alo, blo); rhi = _mm_unpacklo_epi8(ahi, bhi); }
+            else if constexpr (sizeof(T) == 2) { rlo = _mm_unpacklo_epi16(alo, blo); rhi = _mm_unpacklo_epi16(ahi, bhi); }
+            else if constexpr (sizeof(T) == 4) { rlo = _mm_unpacklo_epi32(alo, blo); rhi = _mm_unpacklo_epi32(ahi, bhi); }
+            else { rlo = _mm_unpacklo_epi64(alo, blo); rhi = _mm_unpacklo_epi64(ahi, bhi); }
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(rlo), rhi, 1);
+#endif
+        }
+    }
+
+    static SIMD_INLINE void interleave_hi(register_t* dst, const register_t* a, const register_t* b)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            *dst = _mm256_unpackhi_ps(*a, *b);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            *dst = _mm256_unpackhi_pd(*a, *b);
+        }
+        else
+        {
+#if SIMD_AVX2
+            if constexpr (sizeof(T) == 1)
+                *dst = _mm256_unpackhi_epi8(*a, *b);
+            else if constexpr (sizeof(T) == 2)
+                *dst = _mm256_unpackhi_epi16(*a, *b);
+            else if constexpr (sizeof(T) == 4)
+                *dst = _mm256_unpackhi_epi32(*a, *b);
+            else
+                *dst = _mm256_unpackhi_epi64(*a, *b);
+#else
+            __m128i alo = _mm256_extractf128_si256(*a, 0), ahi = _mm256_extractf128_si256(*a, 1);
+            __m128i blo = _mm256_extractf128_si256(*b, 0), bhi = _mm256_extractf128_si256(*b, 1);
+            __m128i rlo, rhi;
+            if constexpr (sizeof(T) == 1) { rlo = _mm_unpackhi_epi8(alo, blo); rhi = _mm_unpackhi_epi8(ahi, bhi); }
+            else if constexpr (sizeof(T) == 2) { rlo = _mm_unpackhi_epi16(alo, blo); rhi = _mm_unpackhi_epi16(ahi, bhi); }
+            else if constexpr (sizeof(T) == 4) { rlo = _mm_unpackhi_epi32(alo, blo); rhi = _mm_unpackhi_epi32(ahi, bhi); }
+            else { rlo = _mm_unpackhi_epi64(alo, blo); rhi = _mm_unpackhi_epi64(ahi, bhi); }
+            *dst = _mm256_insertf128_si256(_mm256_castsi128_si256(rlo), rhi, 1);
+#endif
+        }
+    }
+};
+
+template <typename T, size_t N>
+struct vector_ops<T, N, avx2_tag> : vector_ops<T, N, avx_tag>
+{
 };
 
 } // namespace detail

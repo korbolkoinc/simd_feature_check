@@ -14,9 +14,7 @@ namespace vector_simd::detail
 {
 
 template <typename T, size_t N>
-struct memory_ops<T, N,
-                  std::enable_if_t<std::is_same_v<current_isa, sse2_tag> ||
-                                   std::is_base_of_v<sse2_tag, current_isa>>>
+struct memory_ops<T, N, sse2_tag>
 {
     using register_t = typename register_type<T, sse2_tag>::type;
 
@@ -176,7 +174,44 @@ struct memory_ops<T, N,
             base[idx_arr[i]] = src_arr[i];
         }
     }
+
+    static SIMD_INLINE void store_nt(const register_t* src, T* dst)
+    {
+        if constexpr (std::is_same_v<T, float>)
+        {
+            _mm_stream_ps(dst, *src);
+        }
+        else if constexpr (std::is_same_v<T, double>)
+        {
+            _mm_stream_pd(dst, *src);
+        }
+        else
+        {
+            _mm_stream_si128(reinterpret_cast<__m128i*>(dst), *src);
+        }
+    }
 };
+
+template <typename T, size_t N>
+struct memory_ops<T, N, sse3_tag> : memory_ops<T, N, sse2_tag>
+{
+};
+
+template <typename T, size_t N>
+struct memory_ops<T, N, ssse3_tag> : memory_ops<T, N, sse2_tag>
+{
+};
+
+template <typename T, size_t N>
+struct memory_ops<T, N, sse4_1_tag> : memory_ops<T, N, sse2_tag>
+{
+};
+
+template <typename T, size_t N>
+struct memory_ops<T, N, sse4_2_tag> : memory_ops<T, N, sse2_tag>
+{
+};
+
 } // namespace vector_simd::detail
 
 #endif // SIMD_ARCH_X86 && SIMD_HAS_SSE2
