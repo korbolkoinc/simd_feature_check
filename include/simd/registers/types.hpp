@@ -401,10 +401,28 @@ struct register_type<uint64_t, avx_tag>
     using type = __m256i;
 };
 
-// Same register types for AVX2
-
 template <typename T>
 struct register_type<T, avx2_tag> : register_type<T, avx_tag>
+{
+};
+
+template <typename T>
+struct register_type<T, sse3_tag> : register_type<T, sse2_tag>
+{
+};
+
+template <typename T>
+struct register_type<T, ssse3_tag> : register_type<T, sse2_tag>
+{
+};
+
+template <typename T>
+struct register_type<T, sse4_1_tag> : register_type<T, sse2_tag>
+{
+};
+
+template <typename T>
+struct register_type<T, sse4_2_tag> : register_type<T, sse2_tag>
 {
 };
 
@@ -569,8 +587,86 @@ struct mask_register_type<T, avx2_tag> : mask_register_type<T, avx_tag>
 };
 
 #ifdef __AVX512F__
-// AVX512 mask register types would go here if needed
+template <>
+struct mask_register_type<float, avx512_tag>
+{
+    using type = __mmask16;
+};
+
+template <>
+struct mask_register_type<double, avx512_tag>
+{
+    using type = __mmask8;
+};
+
+template <>
+struct mask_register_type<int8_t, avx512_tag>
+{
+    using type = __mmask64;
+};
+
+template <>
+struct mask_register_type<uint8_t, avx512_tag>
+{
+    using type = __mmask64;
+};
+
+template <>
+struct mask_register_type<int16_t, avx512_tag>
+{
+    using type = __mmask32;
+};
+
+template <>
+struct mask_register_type<uint16_t, avx512_tag>
+{
+    using type = __mmask32;
+};
+
+template <>
+struct mask_register_type<int32_t, avx512_tag>
+{
+    using type = __mmask16;
+};
+
+template <>
+struct mask_register_type<uint32_t, avx512_tag>
+{
+    using type = __mmask16;
+};
+
+template <>
+struct mask_register_type<int64_t, avx512_tag>
+{
+    using type = __mmask8;
+};
+
+template <>
+struct mask_register_type<uint64_t, avx512_tag>
+{
+    using type = __mmask8;
+};
 #endif
+
+template <typename T>
+struct mask_register_type<T, sse3_tag> : mask_register_type<T, sse2_tag>
+{
+};
+
+template <typename T>
+struct mask_register_type<T, ssse3_tag> : mask_register_type<T, sse2_tag>
+{
+};
+
+template <typename T>
+struct mask_register_type<T, sse4_1_tag> : mask_register_type<T, sse2_tag>
+{
+};
+
+template <typename T>
+struct mask_register_type<T, sse4_2_tag> : mask_register_type<T, sse2_tag>
+{
+};
 
 #if defined(__ARM_NEON) || defined(__ARM_NEON__)
 

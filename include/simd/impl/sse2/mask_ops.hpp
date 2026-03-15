@@ -14,7 +14,7 @@
 namespace vector_simd::detail
 {
 template <typename T, size_t N>
-struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2>::compile_time>>
+struct mask_ops<T, N, sse2_tag>
 {
     using mask_register_t = typename mask_register_type<T, sse2_tag>::type;
     using register_t = typename register_type<T, sse2_tag>::type;
@@ -360,11 +360,11 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2
     {
         if constexpr (std::is_same_v<T, float>)
         {
-            return _mm_movemask_ps(*mask);
+            return static_cast<uint64_t>(_mm_movemask_ps(*mask));
         }
         else if constexpr (std::is_same_v<T, double>)
         {
-            return _mm_movemask_pd(*mask);
+            return static_cast<uint64_t>(_mm_movemask_pd(*mask));
         }
         else
         {
@@ -444,6 +444,27 @@ struct mask_ops<T, N, std::enable_if_t<simd::FeatureDetector<simd::Feature::SSE2
         }
     }
 };
+
+template <typename T, size_t N>
+struct mask_ops<T, N, sse3_tag> : mask_ops<T, N, sse2_tag>
+{
+};
+
+template <typename T, size_t N>
+struct mask_ops<T, N, ssse3_tag> : mask_ops<T, N, sse2_tag>
+{
+};
+
+template <typename T, size_t N>
+struct mask_ops<T, N, sse4_1_tag> : mask_ops<T, N, sse2_tag>
+{
+};
+
+template <typename T, size_t N>
+struct mask_ops<T, N, sse4_2_tag> : mask_ops<T, N, sse2_tag>
+{
+};
+
 } // namespace vector_simd::detail
 
 #endif
