@@ -16,6 +16,30 @@
 #include <simd/vector/base.hpp>
 #include <simd/vector/vector.hpp>
 
+#include <simd/impl/generic/vector_ops.hpp>
+#include <simd/impl/generic/mask_ops.hpp>
+#include <simd/impl/generic/math_ops.hpp>
+#include <simd/impl/generic/memory_ops.hpp>
+
+#if SIMD_ARCH_X86
+#include <simd/impl/sse2/vector_ops.hpp>
+#include <simd/impl/sse2/mask_ops.hpp>
+#include <simd/impl/sse2/math_ops.hpp>
+#include <simd/impl/sse2/memory_ops.hpp>
+#if SIMD_HAS_AVX
+#include <simd/impl/avx/vector_ops.hpp>
+#include <simd/impl/avx/mask_ops.hpp>
+#include <simd/impl/avx/math_ops.hpp>
+#include <simd/impl/avx/memory_ops.hpp>
+#endif
+#if SIMD_HAS_AVX512F
+#include <simd/impl/avx512/vector_ops.hpp>
+#include <simd/impl/avx512/mask_ops.hpp>
+#include <simd/impl/avx512/math_ops.hpp>
+#include <simd/impl/avx512/memory_ops.hpp>
+#endif
+#endif
+
 namespace vector_simd
 {
 

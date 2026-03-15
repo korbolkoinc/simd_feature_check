@@ -381,6 +381,144 @@ public:
     }
 
     static void prefetch(const T* ptr, int hint = 0) { mem_ops::prefetch(ptr, hint); }
+
+    static Vector zeros()
+    {
+        Vector result;
+        for (size_t i = 0; i < num_registers; ++i) mem_ops::set_zero(&result.registers[i]);
+        return result;
+    }
+
+    static Vector ones() { return Vector(T(1)); }
+
+    static Vector iota(T start = T(0))
+    {
+        std::array<T, storage_size> tmp{};
+        for (size_t i = 0; i < N; ++i) tmp[i] = static_cast<T>(start + static_cast<T>(i));
+        return Vector::load(tmp.data());
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    Vector rsqrt() const
+    {
+        Vector result;
+        math::rsqrt(result.data(), registers.data());
+        return result;
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    Vector rcp() const
+    {
+        Vector result;
+        math::rcp(result.data(), registers.data());
+        return result;
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    Vector floor() const
+    {
+        Vector result;
+        math::floor(result.data(), registers.data());
+        return result;
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    Vector ceil() const
+    {
+        Vector result;
+        math::ceil(result.data(), registers.data());
+        return result;
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    Vector round() const
+    {
+        Vector result;
+        math::round(result.data(), registers.data());
+        return result;
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    Vector trunc() const
+    {
+        Vector result;
+        math::trunc(result.data(), registers.data());
+        return result;
+    }
+
+    Vector clamp(const Vector& lo, const Vector& hi) const
+    {
+        Vector result;
+        ops::clamp(result.data(), registers.data(), lo.data(), hi.data());
+        return result;
+    }
+
+    Vector add_sat(const Vector& rhs) const
+    {
+        Vector result;
+        ops::add_sat(result.data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    Vector sub_sat(const Vector& rhs) const
+    {
+        Vector result;
+        ops::sub_sat(result.data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_integral_v<U>, int> = 0>
+    Vector shift_left(int count) const
+    {
+        Vector result;
+        ops::shift_left(result.data(), registers.data(), count);
+        return result;
+    }
+
+    template <typename U = T, std::enable_if_t<std::is_integral_v<U>, int> = 0>
+    Vector shift_right(int count) const
+    {
+        Vector result;
+        ops::shift_right(result.data(), registers.data(), count);
+        return result;
+    }
+
+    T reduce_add() const { return ops::reduce_add(registers.data()); }
+
+    T reduce_min() const { return ops::reduce_min(registers.data()); }
+
+    T reduce_max() const { return ops::reduce_max(registers.data()); }
+
+    template <typename U = T, std::enable_if_t<std::is_floating_point_v<U>, int> = 0>
+    T dot(const Vector& rhs) const
+    {
+        return ops::dot(registers.data(), rhs.data());
+    }
+
+    void store_nt(T* ptr) const { mem_ops::store_nt(ptr, registers.data()); }
+
+    Vector interleave_lo(const Vector& rhs) const
+    {
+        Vector result;
+        ops::interleave_lo(result.data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    Vector interleave_hi(const Vector& rhs) const
+    {
+        Vector result;
+        ops::interleave_hi(result.data(), registers.data(), rhs.data());
+        return result;
+    }
+
+    const T* begin() const
+    {
+        static thread_local std::array<T, storage_size> buf;
+        store(buf.data());
+        return buf.data();
+    }
+
+    const T* end() const { return begin() + N; }
 };
 } // namespace vector_simd
 
