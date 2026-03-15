@@ -172,7 +172,7 @@ SIMD_INLINE void sincos_ps(__m128 x, __m128* s, __m128* c)
     __m128 cy = sc_p0;
     cy = _mm_add_ps(_mm_mul_ps(cy, z), sc_p1);
     cy = _mm_add_ps(_mm_mul_ps(cy, z), sc_p2);
-    cy = _mm_mul_ps(_mm_mul_ps(cy, z), z);
+    cy = _mm_mul_ps(cy, z);
     cy = _mm_add_ps(_mm_mul_ps(cy, x), x);
 
     xmm1 = _mm_andnot_ps(poly_mask, cy);

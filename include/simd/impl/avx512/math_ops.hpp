@@ -168,7 +168,7 @@ SIMD_INLINE void sincos_ps(__m512 x, __m512* s, __m512* c)
 
     __m512 cy = _mm512_fmadd_ps(sc_p0, z, sc_p1);
     cy = _mm512_fmadd_ps(cy, z, sc_p2);
-    cy = _mm512_mul_ps(_mm512_mul_ps(cy, z), z);
+    cy = _mm512_mul_ps(cy, z);
     cy = _mm512_fmadd_ps(cy, x, x);
 
     *s = _mm512_mask_blend_ps(poly_mask, sy, cy);
